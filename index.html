@@ -294,8 +294,8 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-size:inherit
 
 /* ── Multi-date entries ── */
 .date-entry{background:var(--ink-50);border-radius:var(--r-sm);border:1.5px solid var(--ink-200);padding:10px 10px 8px;margin-bottom:8px;position:relative}
-.date-entry-hdr{display:grid;grid-template-columns:1fr 72px;gap:8px;margin-bottom:8px;padding-right:26px}
-.date-entry-times{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.date-entry-hdr{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;padding-right:30px}
+.date-entry-times{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .date-entry-rm{position:absolute;top:8px;right:8px;background:none;border:none;color:var(--ink-400);cursor:pointer;font-size:15px;padding:2px 5px;line-height:1;border-radius:4px}
 .date-entry-rm:active{color:var(--danger);background:var(--danger-50)}
 .date-entry-rm:disabled{opacity:.3;cursor:not-allowed}
@@ -429,7 +429,7 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-size:inherit
         <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.2)">
           <div style="font-size:11.5px;opacity:.9;line-height:1.6;margin-bottom:8px">
             Sistem pencatatan &amp; pelaporan lembur pegawai<br>
-            <strong>BPS Kabupaten Lembata.</strong> Input data lembur, generate laporan Word &amp; PDF, serta sinkronisasi ke Google Sheets secara otomatis.
+            <strong>BPS Kabupaten Lembata.</strong> Input data lembur dan generate laporan Word &amp; PDF.
           </div>
           <!-- sel-profil hidden — masih dipakai oleh setPegActive() & populatePegDropdowns() -->
           <select id="sel-profil" onchange="setPegActive()" style="display:none">
@@ -462,9 +462,7 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-size:inherit
       </div>
 
       <div class="action-row">
-        <button class="btn btn-ghost btn-sm" style="flex:1" onclick="exportListWord()">📄 Word</button>
-        <button class="btn btn-ghost btn-sm" style="flex:1" onclick="exportListPDF()">📑 PDF</button>
-        <button class="btn btn-ghost btn-sm" style="flex:1" onclick="toggleRekap()">📊 Rekap</button>
+        <button class="btn btn-primary btn-full" style="padding:14px;font-size:15px;letter-spacing:.2px" onclick="toggleRekap()">📊 Rekap Lembur</button>
       </div>
 
       <div id="hist-summary" style="display:none" class="summary-bar">
@@ -493,7 +491,7 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-size:inherit
           <div class="success-title">Lembur Berhasil Disimpan!</div>
           <div class="success-detail" id="success-detail"></div>
           <div class="success-export">
-            <button class="btn btn-ghost" style="flex:1" onclick="exportSuccessWord()">📄 Simpan Word</button>
+            <button class="btn btn-ghost" style="flex:1" onclick="setTab('dashboard')">🏠 Ke Dashboard</button>
             <button class="btn btn-ghost" style="flex:1" onclick="exportSuccessPDF()">📑 Simpan PDF</button>
           </div>
           <button class="btn btn-primary btn-full" onclick="inputBaru()">✍️ Input Lembur Baru</button>
@@ -561,7 +559,7 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-size:inherit
                 <div style="display:flex;gap:6px">
                   <input type="text" id="f-mulai" inputmode="numeric" placeholder="08:00" maxlength="5"
                          oninput="autoColonTime(this)" onblur="validateTime(this)" autocomplete="off" style="flex:1">
-                  <button type="button" class="btn btn-ghost btn-sm" style="padding:9px 10px;flex-shrink:0"
+                  <button type="button" class="btn btn-ghost btn-sm tp-trigger-btn" style="padding:9px 10px;flex-shrink:0"
                           onclick="openTimePicker('mulai')" title="Pilih jam">🕐</button>
                 </div>
                 <div class="hint" id="f-mulai-err" style="color:var(--danger);display:none"></div>
@@ -571,7 +569,7 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-size:inherit
                 <div style="display:flex;gap:6px">
                   <input type="text" id="f-selesai" inputmode="numeric" placeholder="16:00" maxlength="5"
                          oninput="autoColonTime(this)" onblur="validateTime(this)" autocomplete="off" style="flex:1">
-                  <button type="button" class="btn btn-ghost btn-sm" style="padding:9px 10px;flex-shrink:0"
+                  <button type="button" class="btn btn-ghost btn-sm tp-trigger-btn" style="padding:9px 10px;flex-shrink:0"
                           onclick="openTimePicker('selesai')" title="Pilih jam">🕐</button>
                 </div>
                 <div class="hint" id="f-selesai-err" style="color:var(--danger);display:none"></div>
@@ -775,10 +773,38 @@ window.addEventListener('DOMContentLoaded', () => {
   onTanggalChange();
 });
 
+function migrateLembur(data) {
+  // Migrasi data lama: entri multi-date yang punya e.dates[]
+  // tapi Jam_Mulai/Jam_Selesai tersimpan rusak (mis. "1899-12-30")
+  return data.map(e => {
+    if (!e.dates || e.dates.length === 0) return e;
+    // Deteksi nilai rusak: bukan format HH:MM
+    const isRusak = v => !v || !String(v).match(/^\d{2}:\d{2}$/);
+    if (isRusak(e.Jam_Mulai) || isRusak(e.Jam_Selesai)) {
+      // Ambil dari dates[0] jika ada
+      const sorted = [...e.dates].filter(d=>d.tanggal).sort((a,b)=>a.tanggal.localeCompare(b.tanggal));
+      const first = sorted[0];
+      if (first) {
+        e = {
+          ...e,
+          Jam_Mulai:  isRusak(e.Jam_Mulai)  ? (first.jam_mulai  || '') : e.Jam_Mulai,
+          Jam_Selesai: isRusak(e.Jam_Selesai) ? (first.jam_selesai || '') : e.Jam_Selesai,
+          Tanggal: isRusak(e.Tanggal) || String(e.Tanggal).startsWith('1899')
+            ? first.tanggal : e.Tanggal,
+          Hari: e.Hari || first.hari || '',
+        };
+      }
+    }
+    return e;
+  });
+}
+
 function loadStorage() {
   S.activePeg = lsj('active_peg');
   S.pegawai   = lsj('peg_cache')  || [];
-  S.lembur    = lsj('lbr_cache')  || [];
+  S.lembur    = migrateLembur(lsj('lbr_cache')  || []);
+  // Simpan hasil migrasi agar data rusak tidak muncul lagi
+  ls_set('lbr_cache', JSON.stringify(S.lembur));
   // Seed contoh data pegawai jika belum ada sama sekali
   if (!S.pegawai.length) {
     S.pegawai = [{
@@ -825,7 +851,14 @@ function setTab(name) {
   S.tab = name;
   el('tab-content' in document ? 'tab-content' : name).scrollTop = 0;
   document.querySelector('.tab-content').scrollTop = 0;
-  if (name === 'dashboard') renderDashboard();
+  if (name === 'dashboard') {
+    renderDashboard();
+    // Sembunyikan success screen jika masih terbuka
+    const sc = el('input-success');
+    if (sc) sc.style.display = 'none';
+    const fm = el('input-form');
+    if (fm) fm.style.display = 'block';
+  }
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -1010,13 +1043,37 @@ function buildRekap(data) {
    ENTRY CARD
 ════════════════════════════════════════════════════════════════ */
 function entryCardHTML(e) {
-  const d  = new Date(e.Tanggal+'T00:00:00');
-  const ds = (e.Hari||HARI[d.getDay()])+', '+d.getDate()+' '+BULAN[d.getMonth()]+' '+d.getFullYear();
+  const isMulti = e.dates && e.dates.length > 0;
+  let ds;
+  if (isMulti) {
+    const sorted = [...e.dates].filter(d=>d.tanggal).sort((a,b)=>a.tanggal.localeCompare(b.tanggal));
+    if (sorted.length === 0) {
+      const d = new Date(e.Tanggal+'T00:00:00');
+      ds = (e.Hari||HARI[d.getDay()])+', '+d.getDate()+' '+BULAN[d.getMonth()]+' '+d.getFullYear();
+    } else if (sorted.length === 1) {
+      const d = new Date(sorted[0].tanggal+'T00:00:00');
+      ds = (sorted[0].hari||HARI[d.getDay()])+', '+d.getDate()+' '+BULAN[d.getMonth()]+' '+d.getFullYear();
+    } else {
+      const first = new Date(sorted[0].tanggal+'T00:00:00');
+      const last  = new Date(sorted[sorted.length-1].tanggal+'T00:00:00');
+      if (first.getMonth()===last.getMonth()&&first.getFullYear()===last.getFullYear())
+        ds = first.getDate()+' – '+last.getDate()+' '+BULAN[first.getMonth()]+' '+first.getFullYear();
+      else
+        ds = first.getDate()+' '+BULAN[first.getMonth()]+' '+first.getFullYear()+
+             ' s/d '+last.getDate()+' '+BULAN[last.getMonth()]+' '+last.getFullYear();
+    }
+  } else {
+    const d = new Date(e.Tanggal+'T00:00:00');
+    ds = (e.Hari||HARI[d.getDay()])+', '+d.getDate()+' '+BULAN[d.getMonth()]+' '+d.getFullYear();
+  }
   const ur = (e.Uraian_Kegiatan||'—').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const jamInfo = isMulti
+    ? (e.dates.length > 1 ? e.dates.length+' hari lembur' : (e.dates[0]?.jam_mulai||'?')+' – '+(e.dates[0]?.jam_selesai||'?'))
+    : (e.Jam_Mulai||'?')+' – '+(e.Jam_Selesai||'?');
   return `<div class="entry-card" onclick="openDetail('${e.ID}')">
     <div class="ec-date">${ds}</div>
     <div class="ec-nama">${e.Nama||'—'}</div>
-    <div class="ec-jam">⏱ ${e.dates&&e.dates.length>1 ? getEntryPeriode(e) : (e.Jam_Mulai||'?')+' – '+(e.Jam_Selesai||'?')} (${fmtJam(Number(e.Total_Jam)||0)} jam)</div>
+    <div class="ec-jam">⏱ ${jamInfo} (${fmtJam(Number(e.Total_Jam)||0)} jam)</div>
     <div class="ec-uraian">${ur}</div>
     <div class="ec-foot">
       <span class="badge badge-navy">${e.No_SPL?'SPKL: '+e.No_SPL:e.Jabatan||'—'}</span>
@@ -1032,8 +1089,45 @@ function openDetail(id) {
   const e = S.lembur.find(x => x.ID === id);
   if (!e) return;
   S.modalId = id;
-  const d  = new Date(e.Tanggal+'T00:00:00');
-  const ds = (e.Hari||HARI[d.getDay()])+', '+d.getDate()+' '+BULAN[d.getMonth()]+' '+d.getFullYear();
+  const isMulti = e.dates && e.dates.length > 0;
+  // Header tanggal
+  let ds;
+  if (isMulti) {
+    const sorted = [...e.dates].filter(d=>d.tanggal).sort((a,b)=>a.tanggal.localeCompare(b.tanggal));
+    if (sorted.length === 0) {
+      const d = new Date(e.Tanggal+'T00:00:00');
+      ds = (e.Hari||HARI[d.getDay()])+', '+d.getDate()+' '+BULAN[d.getMonth()]+' '+d.getFullYear();
+    } else if (sorted.length === 1) {
+      const d = new Date(sorted[0].tanggal+'T00:00:00');
+      ds = (sorted[0].hari||HARI[d.getDay()])+', '+d.getDate()+' '+BULAN[d.getMonth()]+' '+d.getFullYear();
+    } else {
+      const first = new Date(sorted[0].tanggal+'T00:00:00');
+      const last  = new Date(sorted[sorted.length-1].tanggal+'T00:00:00');
+      if (first.getMonth()===last.getMonth()&&first.getFullYear()===last.getFullYear())
+        ds = first.getDate()+' – '+last.getDate()+' '+BULAN[first.getMonth()]+' '+first.getFullYear();
+      else
+        ds = first.getDate()+' '+BULAN[first.getMonth()]+' '+first.getFullYear()+
+             ' s/d '+last.getDate()+' '+BULAN[last.getMonth()]+' '+last.getFullYear();
+    }
+  } else {
+    const d = new Date(e.Tanggal+'T00:00:00');
+    ds = (e.Hari||HARI[d.getDay()])+', '+d.getDate()+' '+BULAN[d.getMonth()]+' '+d.getFullYear();
+  }
+  // Jam lembur
+  let jamHTML;
+  if (isMulti && e.dates.length > 0) {
+    const sorted = [...e.dates].filter(d=>d.tanggal).sort((a,b)=>a.tanggal.localeCompare(b.tanggal));
+    jamHTML = sorted.map(d=>{
+      const dd = new Date(d.tanggal+'T00:00:00');
+      const tgl = (d.hari||HARI[dd.getDay()])+' '+dd.getDate()+' '+BULAN[dd.getMonth()];
+      const jam = (d.jam_mulai||'?')+' – '+(d.jam_selesai||'?');
+      const tot = d.total_jam > 0 ? ' ('+Math.floor(d.total_jam)+' jam)' : '';
+      return '<div style="font-size:12.5px;margin-bottom:2px">'+tgl+': '+jam+tot+'</div>';
+    }).join('');
+    if (e.dates.length > 1) jamHTML += '<div style="margin-top:4px;font-weight:700">Total: '+fmt2(Number(e.Total_Jam)||0)+' jam</div>';
+  } else {
+    jamHTML = (e.Jam_Mulai||'?')+' – '+(e.Jam_Selesai||'?')+' &nbsp;·&nbsp; <strong>'+fmt2(Number(e.Total_Jam)||0)+' jam</strong>';
+  }
   const urS  = (e.Uraian_Kegiatan||'—').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const outS = (e.Output||'—').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   el('modal-content').innerHTML = `
@@ -1044,7 +1138,7 @@ function openDetail(id) {
     <div class="dl-row"><div class="dl-label">Golongan</div><div class="dl-val">${e.Golongan||'—'}</div></div>
     <div class="dl-row"><div class="dl-label">Unit Kerja</div><div class="dl-val">${e.Unit_Kerja||'—'}</div></div>
     <div class="dl-sep"></div>
-    <div class="dl-row"><div class="dl-label">Jam Lembur</div><div class="dl-val">${e.Jam_Mulai||'?'} – ${e.Jam_Selesai||'?'} &nbsp;·&nbsp; <strong>${fmt2(Number(e.Total_Jam)||0)} jam</strong></div></div>
+    <div class="dl-row"><div class="dl-label">Jam Lembur</div><div class="dl-val">${jamHTML}</div></div>
     <div class="dl-row"><div class="dl-label">No. SPL</div><div class="dl-val">${e.No_SPL||'—'}</div></div>
     <div class="dl-sep"></div>
     <div class="dl-row"><div class="dl-label">Uraian Kegiatan</div><div class="dl-val" style="white-space:pre-wrap;line-height:1.6">${urS}</div></div>
@@ -1132,16 +1226,24 @@ function renderMultiDates() {
       </div>
       <div class="date-entry-times">
         <div class="fg"><label>Jam Mulai</label>
-          <input type="text" inputmode="numeric" maxlength="5" placeholder="08:00"
-            value="${d.jam_mulai||''}"
-            oninput="autoColonTimeMulti(this,${i},'jam_mulai')"
-            onblur="calcDurasiMulti(${i})">
+          <div style="display:flex;gap:5px">
+            <input type="text" id="jam-mulai-multi-${i}" inputmode="numeric" maxlength="5" placeholder="08:00" style="flex:1"
+              value="${d.jam_mulai||''}"
+              oninput="autoColonTimeMulti(this,${i},'jam_mulai')"
+              onblur="calcDurasiMulti(${i})">
+            <button type="button" class="btn btn-ghost btn-sm" style="padding:7px 8px;flex-shrink:0"
+                    onclick="openTimePickerMulti(${i},'jam_mulai')" title="Pilih jam">🕐</button>
+          </div>
         </div>
         <div class="fg"><label>Jam Selesai</label>
-          <input type="text" inputmode="numeric" maxlength="5" placeholder="17:00"
-            value="${d.jam_selesai||''}"
-            oninput="autoColonTimeMulti(this,${i},'jam_selesai')"
-            onblur="calcDurasiMulti(${i})">
+          <div style="display:flex;gap:5px">
+            <input type="text" id="jam-selesai-multi-${i}" inputmode="numeric" maxlength="5" placeholder="17:00" style="flex:1"
+              value="${d.jam_selesai||''}"
+              oninput="autoColonTimeMulti(this,${i},'jam_selesai')"
+              onblur="calcDurasiMulti(${i})">
+            <button type="button" class="btn btn-ghost btn-sm" style="padding:7px 8px;flex-shrink:0"
+                    onclick="openTimePickerMulti(${i},'jam_selesai')" title="Pilih jam">🕐</button>
+          </div>
         </div>
       </div>
       <div class="date-entry-dur" id="dur-multi-${i}">${d.total_jam ? Math.floor(d.total_jam)+' Jam' : ''}</div>
@@ -1254,33 +1356,69 @@ function getEntryPeriode(e) {
 }
 
 /* ─── Time picker ─────────────────────────────────────────── */
-let _tpTarget = null;
-function openTimePicker(field) {
-  _tpTarget = field;
-  const inp = el('f-' + field);
+let _tpTarget    = null;   // 'mulai' | 'selesai'  — mode 1 tanggal
+let _tpMultiIdx  = null;   // index S.multiDates   — mode multi
+let _tpMultiField= null;   // 'jam_mulai' | 'jam_selesai'
+
+function _tpEnsureOptions() {
   const h = el('tp-hour'), m = el('tp-min');
   if (!h.options.length) {
     for (let i=0;i<24;i++) h.add(new Option(String(i).padStart(2,'0'), i));
     for (let i=0;i<60;i++) m.add(new Option(String(i).padStart(2,'0'), i));
   }
-  if (inp.value && inp.value.includes(':') && inp.value.length===5) {
-    const [hv,mv]=inp.value.split(':').map(Number);
-    if (hv>=0&&hv<24) h.value=hv;
-    if (mv>=0&&mv<60) m.value=mv;
+}
+function _tpPrefill(val) {
+  if (val && val.includes(':') && val.length===5) {
+    const [hv,mv]=val.split(':').map(Number);
+    if (hv>=0&&hv<24) el('tp-hour').value=hv;
+    if (mv>=0&&mv<60) el('tp-min').value=mv;
   }
+}
+
+function openTimePicker(field) {
+  _tpTarget = field; _tpMultiIdx = null; _tpMultiField = null;
+  _tpEnsureOptions();
+  _tpPrefill(el('f-' + field).value);
   el('tp-title').textContent = field==='mulai' ? '🕐 Pilih Jam Mulai' : '🕐 Pilih Jam Selesai';
+  el('tp-overlay').classList.add('open');
+}
+function openTimePickerMulti(i, field) {
+  _tpTarget = null; _tpMultiIdx = i; _tpMultiField = field;
+  _tpEnsureOptions();
+  const d = S.multiDates[i];
+  _tpPrefill(d ? d[field] : '');
+  el('tp-title').textContent = field==='jam_mulai' ? '🕐 Pilih Jam Mulai' : '🕐 Pilih Jam Selesai';
   el('tp-overlay').classList.add('open');
 }
 function closeTimePicker() {
   el('tp-overlay').classList.remove('open');
-  _tpTarget = null;
+  _tpTarget = null; _tpMultiIdx = null; _tpMultiField = null;
 }
 function applyTimePicker() {
-  if (!_tpTarget) { closeTimePicker(); return; }
   const hv = String(el('tp-hour').value).padStart(2,'0');
   const mv = String(el('tp-min').value).padStart(2,'0');
+  const time = hv+':'+mv;
+
+  if (_tpMultiIdx !== null) {
+    // Mode multi-tanggal
+    const d = S.multiDates[_tpMultiIdx];
+    if (d) {
+      d[_tpMultiField] = time;
+      // Update input DOM menggunakan ID spesifik (bukan querySelectorAll yang bisa salah index)
+      const inputId = _tpMultiField === 'jam_mulai'
+        ? 'jam-mulai-multi-' + _tpMultiIdx
+        : 'jam-selesai-multi-' + _tpMultiIdx;
+      const inp = el(inputId);
+      if (inp) { inp.value = time; inp.style.borderColor = ''; }
+      calcDurasiMulti(_tpMultiIdx);
+    }
+    closeTimePicker(); return;
+  }
+
+  // Mode 1 tanggal
+  if (!_tpTarget) { closeTimePicker(); return; }
   const inp = el('f-' + _tpTarget);
-  inp.value = hv+':'+mv;
+  inp.value = time;
   inp.style.borderColor = '';
   el('f-'+_tpTarget+'-err').style.display = 'none';
   closeTimePicker();
@@ -2253,100 +2391,133 @@ function generateOutput() {
   // Variasi per kategori
   const CAT = {
     rekap:[
-      {op:'tersusunnya',      j:'rekapitulasi dan kompilasi data',          s:'dokumen rekapitulasi yang akurat dan terstruktur'},
-      {op:'terselesaikannya', j:'penyusunan rekap dan kompilasi data',       s:'hasil kompilasi data yang valid dan siap digunakan'},
-      {op:'terpenuhinya',     j:'target rekapitulasi data',                  s:'dokumen rekapitulasi yang terdokumentasi dengan baik'},
-      {op:'terwujudnya',      j:'penghimpunan dan kompilasi data',           s:'rekap data yang lengkap dan dapat dipertanggungjawabkan'},
-      {op:'dihasilkannya',    j:'kegiatan kompilasi dan rekap data',         s:'dokumen rekapitulasi yang terverifikasi dan akurat'},
+      {op:'tersusunnya',      j:'rekapitulasi dan kompilasi data',                s:'dokumen rekapitulasi yang akurat dan terstruktur'},
+      {op:'terselesaikannya', j:'penyusunan rekap dan kompilasi data',             s:'hasil kompilasi data yang valid dan siap digunakan'},
+      {op:'terpenuhinya',     j:'target rekapitulasi data',                        s:'dokumen rekapitulasi yang terdokumentasi dengan baik'},
+      {op:'terwujudnya',      j:'penghimpunan dan kompilasi data',                 s:'rekap data yang lengkap dan dapat dipertanggungjawabkan'},
+      {op:'dihasilkannya',    j:'kegiatan kompilasi dan rekap data',               s:'dokumen rekapitulasi yang terverifikasi dan akurat'},
+      {op:'tuntasnya',        j:'penyusunan dan kompilasi rekapitulasi data',      s:'data rekapitulasi yang tersusun rapi dan siap dilaporkan'},
+      {op:'tercapainya',      j:'penghimpunan data secara menyeluruh',             s:'rekap data lengkap yang memudahkan proses analisis selanjutnya'},
+      {op:'selesainya',       j:'proses rekapitulasi data secara sistematis',      s:'kompilasi data yang terstruktur dan bebas dari kesalahan input'},
     ],
     survei:[
-      {op:'terlaksananya',    j:'kegiatan pengumpulan data lapangan',        s:'data primer yang lengkap dan valid dari responden'},
-      {op:'terselesaikannya', j:'pencacahan dan pengumpulan data lapangan',  s:'data lapangan yang terstruktur dan siap diolah'},
-      {op:'terpenuhinya',     j:'target pengumpulan data survei',            s:'data responden yang akurat dan terdokumentasi'},
-      {op:'terwujudnya',      j:'kegiatan pencacahan dan survei lapangan',   s:'data primer yang terverifikasi dari seluruh responden'},
-      {op:'dihasilkannya',    j:'kegiatan pengambilan data di lapangan',     s:'kumpulan data lapangan yang memenuhi standar kualitas'},
+      {op:'terlaksananya',    j:'kegiatan pengumpulan data lapangan',              s:'data primer yang lengkap dan valid dari responden'},
+      {op:'terselesaikannya', j:'pencacahan dan pengumpulan data lapangan',        s:'data lapangan yang terstruktur dan siap diolah'},
+      {op:'terpenuhinya',     j:'target pengumpulan data survei',                  s:'data responden yang akurat dan terdokumentasi'},
+      {op:'terwujudnya',      j:'kegiatan pencacahan dan survei lapangan',         s:'data primer yang terverifikasi dari seluruh responden'},
+      {op:'dihasilkannya',    j:'kegiatan pengambilan data di lapangan',           s:'kumpulan data lapangan yang memenuhi standar kualitas'},
+      {op:'tuntasnya',        j:'pencacahan responden di wilayah tugas',           s:'data survei yang lengkap dan siap dimasukkan ke sistem'},
+      {op:'tercapainya',      j:'target kunjungan dan wawancara responden',        s:'data wawancara yang komprehensif dan dapat dipertanggungjawabkan'},
+      {op:'selesainya',       j:'kegiatan survei dan pendataan lapangan',          s:'dataset lapangan yang valid dan memenuhi target pencacahan'},
     ],
     input:[
-      {op:'terselesaikannya', j:'pemasukan dan pengolahan data',             s:'data yang telah diinput secara lengkap ke dalam sistem'},
-      {op:'terlaksananya',    j:'kegiatan entri dan pemasukan data',         s:'data yang tersimpan rapi dalam sistem informasi'},
-      {op:'terpenuhinya',     j:'target pemasukan data ke sistem',           s:'rekaman data yang valid dan siap diproses lebih lanjut'},
-      {op:'terwujudnya',      j:'pengisian dan entri data secara sistematis',s:'data yang terinput lengkap sesuai format yang ditentukan'},
-      {op:'dihasilkannya',    j:'proses pemasukan dan verifikasi data input',s:'basis data yang akurat dan siap untuk keperluan pelaporan'},
+      {op:'terselesaikannya', j:'pemasukan dan pengolahan data',                   s:'data yang telah diinput secara lengkap ke dalam sistem'},
+      {op:'terlaksananya',    j:'kegiatan entri dan pemasukan data',               s:'data yang tersimpan rapi dalam sistem informasi'},
+      {op:'terpenuhinya',     j:'target pemasukan data ke sistem',                 s:'rekaman data yang valid dan siap diproses lebih lanjut'},
+      {op:'terwujudnya',      j:'pengisian dan entri data secara sistematis',      s:'data yang terinput lengkap sesuai format yang ditentukan'},
+      {op:'dihasilkannya',    j:'proses pemasukan dan verifikasi data input',      s:'basis data yang akurat dan siap untuk keperluan pelaporan'},
+      {op:'tuntasnya',        j:'entri data ke dalam sistem pengolahan',           s:'data terinput yang telah tervalidasi dan bebas duplikasi'},
+      {op:'tercapainya',      j:'target pengisian data sesuai jadwal',             s:'data sistem yang lengkap dan siap untuk proses pengolahan lanjutan'},
+      {op:'selesainya',       j:'proses input dan verifikasi data secara tuntas',  s:'rekaman data digital yang akurat dan tersimpan dalam sistem'},
     ],
     laporan:[
-      {op:'tersusunnya',      j:'dokumen laporan kegiatan',                  s:'laporan yang siap disampaikan kepada pimpinan'},
-      {op:'terselesaikannya', j:'penyusunan dan finalisasi laporan',         s:'dokumen laporan yang komprehensif dan terstruktur'},
-      {op:'terpenuhinya',     j:'kewajiban penyusunan laporan kegiatan',     s:'laporan yang lengkap dan memenuhi format yang berlaku'},
-      {op:'terwujudnya',      j:'pembuatan dokumen laporan yang sistematis', s:'laporan tertulis yang akuntabel dan siap diarsipkan'},
-      {op:'dihasilkannya',    j:'kegiatan penulisan dan penyusunan laporan', s:'laporan akhir yang siap disampaikan dan didistribusikan'},
+      {op:'tersusunnya',      j:'dokumen laporan kegiatan',                        s:'laporan yang siap disampaikan kepada pimpinan'},
+      {op:'terselesaikannya', j:'penyusunan dan finalisasi laporan',               s:'dokumen laporan yang komprehensif dan terstruktur'},
+      {op:'terpenuhinya',     j:'kewajiban penyusunan laporan kegiatan',           s:'laporan yang lengkap dan memenuhi format yang berlaku'},
+      {op:'terwujudnya',      j:'pembuatan dokumen laporan yang sistematis',       s:'laporan tertulis yang akuntabel dan siap diarsipkan'},
+      {op:'dihasilkannya',    j:'kegiatan penulisan dan penyusunan laporan',       s:'laporan akhir yang siap disampaikan dan didistribusikan'},
+      {op:'tuntasnya',        j:'penyusunan laporan pelaksanaan kegiatan',         s:'dokumen laporan final yang memenuhi standar instansi'},
+      {op:'tercapainya',      j:'target penyusunan dan penyelesaian laporan',      s:'laporan lengkap yang siap diperiksa dan ditandatangani pimpinan'},
+      {op:'selesainya',       j:'penulisan laporan kegiatan secara menyeluruh',    s:'naskah laporan yang sistematis dan dapat dipertanggungjawabkan'},
     ],
     analisis:[
-      {op:'terselesaikannya', j:'analisis dan pengolahan data statistik',    s:'hasil analisis data yang telah diolah secara sistematis'},
-      {op:'terlaksananya',    j:'kegiatan analisa dan tabulasi data',        s:'output analisis yang siap dijadikan bahan pelaporan'},
-      {op:'terpenuhinya',     j:'proses pengolahan dan analisis data',       s:'hasil olahan data yang akurat dan terdokumentasi'},
-      {op:'terwujudnya',      j:'kegiatan tabulasi dan interpretasi data',   s:'data analitik yang valid dan siap dipresentasikan'},
-      {op:'dihasilkannya',    j:'analisis mendalam atas data statistik',     s:'temuan analisis yang dapat dipertanggungjawabkan secara ilmiah'},
+      {op:'terselesaikannya', j:'analisis dan pengolahan data statistik',          s:'hasil analisis data yang telah diolah secara sistematis'},
+      {op:'terlaksananya',    j:'kegiatan analisa dan tabulasi data',              s:'output analisis yang siap dijadikan bahan pelaporan'},
+      {op:'terpenuhinya',     j:'proses pengolahan dan analisis data',             s:'hasil olahan data yang akurat dan terdokumentasi'},
+      {op:'terwujudnya',      j:'kegiatan tabulasi dan interpretasi data',         s:'data analitik yang valid dan siap dipresentasikan'},
+      {op:'dihasilkannya',    j:'analisis mendalam atas data statistik',           s:'temuan analisis yang dapat dipertanggungjawabkan secara ilmiah'},
+      {op:'tuntasnya',        j:'pengolahan dan tabulasi data statistik',          s:'tabel dan grafik analisis yang siap disajikan dalam laporan'},
+      {op:'tercapainya',      j:'target pengolahan data sesuai metodologi',        s:'hasil olahan data yang valid dan siap dipublikasikan'},
+      {op:'selesainya',       j:'proses analisis dan interpretasi data',           s:'simpulan analisis yang terukur dan berbasis data valid'},
     ],
     verifikasi:[
-      {op:'terpenuhinya',     j:'kegiatan verifikasi dan validasi data',     s:'data yang telah terverifikasi keakuratan dan kelengkapannya'},
-      {op:'terselesaikannya', j:'pemeriksaan dan validasi data',             s:'data yang telah lolos proses verifikasi dan bebas kesalahan'},
-      {op:'terlaksananya',    j:'pengecekan dan klarifikasi data',           s:'data terverifikasi yang siap digunakan dalam pelaporan'},
-      {op:'terwujudnya',      j:'proses validasi dan koreksi data',          s:'data yang telah diperbaiki dan memenuhi standar kualitas'},
-      {op:'dihasilkannya',    j:'kegiatan quality control dan verifikasi',   s:'data bersih yang telah melalui proses validasi menyeluruh'},
+      {op:'terpenuhinya',     j:'kegiatan verifikasi dan validasi data',           s:'data yang telah terverifikasi keakuratan dan kelengkapannya'},
+      {op:'terselesaikannya', j:'pemeriksaan dan validasi data',                   s:'data yang telah lolos proses verifikasi dan bebas kesalahan'},
+      {op:'terlaksananya',    j:'pengecekan dan klarifikasi data',                 s:'data terverifikasi yang siap digunakan dalam pelaporan'},
+      {op:'terwujudnya',      j:'proses validasi dan koreksi data',                s:'data yang telah diperbaiki dan memenuhi standar kualitas'},
+      {op:'dihasilkannya',    j:'kegiatan quality control dan verifikasi',         s:'data bersih yang telah melalui proses validasi menyeluruh'},
+      {op:'tuntasnya',        j:'pemeriksaan silang dan verifikasi data',          s:'data yang telah tervalidasi dan bebas dari inkonsistensi'},
+      {op:'tercapainya',      j:'target validasi data sesuai standar mutu',        s:'kumpulan data bersih yang siap untuk tahap pengolahan lanjutan'},
+      {op:'selesainya',       j:'proses pengecekan dan koreksi data secara menyeluruh', s:'data terverifikasi yang memenuhi kriteria kelengkapan dan akurasi'},
     ],
     rapat:[
-      {op:'terlaksananya',    j:'kegiatan koordinasi dan rapat',             s:'hasil kesepakatan dan tindak lanjut yang ditetapkan bersama'},
-      {op:'terselesaikannya', j:'agenda rapat dan koordinasi tim',           s:'notulensi dan rencana tindak lanjut yang telah disepakati'},
-      {op:'terpenuhinya',     j:'kewajiban koordinasi dan pertemuan',        s:'hasil pertemuan yang terdokumentasi dan siap ditindaklanjuti'},
-      {op:'terwujudnya',      j:'forum diskusi dan koordinasi lintas unit',  s:'kesimpulan rapat yang komprehensif dan dapat diimplementasikan'},
-      {op:'dihasilkannya',    j:'kegiatan koordinasi dan sinkronisasi',      s:'rekomendasi dan arahan yang ditetapkan dalam pertemuan'},
+      {op:'terlaksananya',    j:'kegiatan koordinasi dan rapat',                   s:'hasil kesepakatan dan tindak lanjut yang ditetapkan bersama'},
+      {op:'terselesaikannya', j:'agenda rapat dan koordinasi tim',                 s:'notulensi dan rencana tindak lanjut yang telah disepakati'},
+      {op:'terpenuhinya',     j:'kewajiban koordinasi dan pertemuan',              s:'hasil pertemuan yang terdokumentasi dan siap ditindaklanjuti'},
+      {op:'terwujudnya',      j:'forum diskusi dan koordinasi lintas unit',        s:'kesimpulan rapat yang komprehensif dan dapat diimplementasikan'},
+      {op:'dihasilkannya',    j:'kegiatan koordinasi dan pembahasan bersama',      s:'rekomendasi dan arahan yang ditetapkan dalam pertemuan'},
+      {op:'tuntasnya',        j:'pelaksanaan rapat dan koordinasi internal',       s:'berita acara dan poin tindak lanjut yang disepakati peserta'},
+      {op:'tercapainya',      j:'agenda koordinasi dan sinkronisasi program',      s:'hasil rapat berupa keputusan dan langkah nyata yang akan dilaksanakan'},
+      {op:'selesainya',       j:'forum koordinasi dan konsultasi bersama',         s:'dokumentasi rapat lengkap beserta rencana kerja tindak lanjut'},
     ],
     dokumen:[
-      {op:'terselesaikannya', j:'pengelolaan dokumen dan administrasi',      s:'dokumen yang telah diproses dan siap digunakan'},
-      {op:'terlaksananya',    j:'penyiapan dan pengarsipan dokumen',         s:'berkas administrasi yang tertata rapi dan mudah diakses'},
-      {op:'terpenuhinya',     j:'kewajiban pengelolaan arsip dan dokumen',   s:'dokumen yang telah diverifikasi dan tersimpan dengan tertib'},
-      {op:'terwujudnya',      j:'tata kelola dokumen dan surat-menyurat',    s:'arsip dokumen yang terorganisir sesuai sistem pengarsipan'},
-      {op:'dihasilkannya',    j:'penyelesaian administrasi dan dokumen',     s:'dokumen lengkap yang siap disampaikan kepada pihak terkait'},
+      {op:'terselesaikannya', j:'pengelolaan dokumen dan administrasi',            s:'dokumen yang telah diproses dan siap digunakan'},
+      {op:'terlaksananya',    j:'penyiapan dan pengarsipan dokumen',               s:'berkas administrasi yang tertata rapi dan mudah diakses'},
+      {op:'terpenuhinya',     j:'kewajiban pengelolaan arsip dan dokumen',         s:'dokumen yang telah diverifikasi dan tersimpan dengan tertib'},
+      {op:'terwujudnya',      j:'tata kelola dokumen dan surat-menyurat',          s:'arsip dokumen yang terorganisir sesuai sistem pengarsipan'},
+      {op:'dihasilkannya',    j:'penyelesaian administrasi dan dokumen',           s:'dokumen lengkap yang siap disampaikan kepada pihak terkait'},
+      {op:'tuntasnya',        j:'penyiapan berkas dan dokumen kedinasan',          s:'dokumen administratif yang lengkap dan telah mendapat pengesahan'},
+      {op:'tercapainya',      j:'target penyusunan dokumen administrasi',          s:'berkas kelengkapan administrasi yang terverifikasi dan siap diarsipkan'},
+      {op:'selesainya',       j:'pengelolaan dan penyelesaian dokumen kedinasan',  s:'arsip surat dan dokumen yang tertib sesuai sistem manajemen kearsipan'},
     ],
     upload:[
-      {op:'terpenuhinya',     j:'kewajiban pengiriman dan pelaporan data',   s:'data yang telah dikirimkan tepat waktu kepada pihak terkait'},
-      {op:'terselesaikannya', j:'proses unggah dan pengiriman data',         s:'data yang berhasil diunggah dan terkonfirmasi oleh sistem'},
-      {op:'terlaksananya',    j:'kegiatan publikasi dan penyampaian data',   s:'data yang tersedia dan dapat diakses oleh pihak berkepentingan'},
-      {op:'terwujudnya',      j:'pengiriman dan distribusi data ke sistem',  s:'kiriman data yang terverifikasi dan terekam dalam server'},
-      {op:'dihasilkannya',    j:'penyelesaian upload dan pelaporan online',  s:'data laporan yang berhasil tersubmit sesuai jadwal'},
+      {op:'terpenuhinya',     j:'kewajiban pengiriman dan pelaporan data',         s:'data yang telah dikirimkan tepat waktu kepada pihak terkait'},
+      {op:'terselesaikannya', j:'proses unggah dan pengiriman data',               s:'data yang berhasil diunggah dan terkonfirmasi oleh sistem'},
+      {op:'terlaksananya',    j:'kegiatan publikasi dan penyampaian data',         s:'data yang tersedia dan dapat diakses oleh pihak berkepentingan'},
+      {op:'terwujudnya',      j:'pengiriman dan distribusi data ke sistem',        s:'kiriman data yang terverifikasi dan terekam dalam server'},
+      {op:'dihasilkannya',    j:'penyelesaian upload dan pelaporan online',        s:'data laporan yang berhasil tersubmit sesuai jadwal'},
+      {op:'tuntasnya',        j:'pengiriman data ke portal pelaporan',             s:'data yang terunggah lengkap dan memperoleh konfirmasi sistem'},
+      {op:'tercapainya',      j:'target submit laporan secara daring',             s:'laporan online yang terkirim tepat waktu dan terdokumentasi'},
+      {op:'selesainya',       j:'proses unggah dan konfirmasi data pelaporan',     s:'data digital yang berhasil tersubmit dan mendapat status terkirim'},
     ],
     monitoring:[
-      {op:'terlaksananya',    j:'kegiatan monitoring dan evaluasi',          s:'hasil pemantauan yang terdokumentasi untuk perbaikan kinerja'},
-      {op:'terselesaikannya', j:'pemantauan dan penilaian kinerja',          s:'laporan monitoring yang komprehensif dan dapat ditindaklanjuti'},
-      {op:'terpenuhinya',     j:'agenda evaluasi dan pemantauan program',    s:'temuan evaluasi yang siap digunakan sebagai bahan perbaikan'},
-      {op:'terwujudnya',      j:'kegiatan asesmen dan evaluasi berkala',     s:'hasil penilaian yang objektif dan terdokumentasi dengan baik'},
-      {op:'dihasilkannya',    j:'proses monitoring lapangan dan evaluasi',   s:'rekomendasi perbaikan berdasarkan hasil monitoring yang valid'},
+      {op:'terlaksananya',    j:'kegiatan monitoring dan evaluasi',                s:'hasil pemantauan yang terdokumentasi untuk perbaikan kinerja'},
+      {op:'terselesaikannya', j:'pemantauan dan penilaian kinerja',                s:'laporan monitoring yang komprehensif dan dapat ditindaklanjuti'},
+      {op:'terpenuhinya',     j:'agenda evaluasi dan pemantauan program',          s:'temuan evaluasi yang siap digunakan sebagai bahan perbaikan'},
+      {op:'terwujudnya',      j:'kegiatan asesmen dan evaluasi berkala',           s:'hasil penilaian yang objektif dan terdokumentasi dengan baik'},
+      {op:'dihasilkannya',    j:'proses monitoring lapangan dan evaluasi',         s:'rekomendasi perbaikan berdasarkan hasil monitoring yang valid'},
+      {op:'tuntasnya',        j:'pemantauan pelaksanaan program dan kegiatan',     s:'catatan monitoring yang sistematis dan siap dijadikan bahan evaluasi'},
+      {op:'tercapainya',      j:'target monitoring dan penilaian berkala',         s:'hasil pemantauan yang komprehensif sebagai dasar pengambilan keputusan'},
+      {op:'selesainya',       j:'evaluasi menyeluruh atas pelaksanaan program',    s:'laporan evaluasi yang memuat temuan, analisis, dan rekomendasi tindak lanjut'},
     ],
     default:[
-      {op:'terlaksananya',    j:'kegiatan penunjang statistik',              s:'pekerjaan yang telah diselesaikan sesuai target'},
-      {op:'terselesaikannya', j:'tugas dan fungsi kestatistikan',            s:'hasil kerja yang memenuhi standar dan prosedur yang berlaku'},
-      {op:'terpenuhinya',     j:'pelaksanaan tugas kedinasan',               s:'output kegiatan yang akuntabel dan sesuai ketentuan'},
-      {op:'terwujudnya',      j:'penyelesaian tugas dan kewajiban dinas',    s:'produk kerja yang siap disampaikan kepada atasan'},
-      {op:'dihasilkannya',    j:'kegiatan pelaksanaan tugas kestatistikan',  s:'luaran pekerjaan yang berkualitas dan dapat dipertanggungjawabkan'},
+      {op:'terlaksananya',    j:'kegiatan penunjang statistik',                    s:'pekerjaan yang telah diselesaikan sesuai target'},
+      {op:'terselesaikannya', j:'tugas dan fungsi kestatistikan',                  s:'hasil kerja yang memenuhi standar dan prosedur yang berlaku'},
+      {op:'terpenuhinya',     j:'pelaksanaan tugas kedinasan',                     s:'output kegiatan yang akuntabel dan sesuai ketentuan'},
+      {op:'terwujudnya',      j:'penyelesaian tugas dan kewajiban dinas',          s:'produk kerja yang siap disampaikan kepada atasan'},
+      {op:'dihasilkannya',    j:'kegiatan pelaksanaan tugas kestatistikan',        s:'luaran pekerjaan yang berkualitas dan dapat dipertanggungjawabkan'},
+      {op:'tuntasnya',        j:'pelaksanaan tugas pokok dan fungsi',              s:'hasil kerja yang terselesaikan tepat waktu dan sesuai arahan'},
+      {op:'tercapainya',      j:'target penyelesaian tugas kedinasan',             s:'produk kerja yang terverifikasi dan memenuhi standar instansi'},
+      {op:'selesainya',       j:'penyelesaian tugas dan tanggung jawab dinas',     s:'luaran kerja yang akuntabel dan siap dilaporkan kepada pimpinan'},
     ],
   };
 
   // Deteksi kategori
   let cat = 'default';
-  if      (/rekap|rekapitulasi|kompilasi|menghimpun|merangkum/.test(u))            cat='rekap';
-  else if (/survei|survey|cacah|pencacahan|lapangan|kunjungan|responden/.test(u))  cat='survei';
-  else if (/input|entri|entry|pemasukan|pengisian/.test(u))                        cat='input';
-  else if (/laporan|penyusunan laporan|membuat laporan/.test(u))                   cat='laporan';
-  else if (/analisis|analisa|pengolahan|olah data|tabulasi/.test(u))               cat='analisis';
-  else if (/verifikasi|validasi|pemeriksaan|pengecekan|koreksi/.test(u))           cat='verifikasi';
-  else if (/rapat|pertemuan|koordinasi|sosialisasi|diskusi/.test(u))               cat='rapat';
-  else if (/dokumen|berkas|administrasi|surat|arsip/.test(u))                      cat='dokumen';
-  else if (/upload|unggah|kirim|pengiriman|publish/.test(u))                       cat='upload';
-  else if (/monitoring|pemantauan|evaluasi|penilaian/.test(u))                     cat='monitoring';
+  if      (/rekap|rekapitulasi|kompilasi|menghimpun|merangkum/.test(u))              cat='rekap';
+  else if (/survei|survey|cacah|pencacahan|lapangan|kunjungan|responden/.test(u))    cat='survei';
+  else if (/input|entri|entry|pemasukan|pengisian/.test(u))                          cat='input';
+  else if (/laporan|penyusunan laporan|membuat laporan/.test(u))                     cat='laporan';
+  else if (/analisis|analisa|pengolahan|olah data|tabulasi/.test(u))                 cat='analisis';
+  else if (/verifikasi|validasi|pemeriksaan|pengecekan|koreksi/.test(u))             cat='verifikasi';
+  else if (/rapat|pertemuan|koordinasi|sosialisasi|diskusi/.test(u))                 cat='rapat';
+  else if (/dokumen|berkas|administrasi|surat|arsip/.test(u))                        cat='dokumen';
+  else if (/upload|unggah|kirim|pengiriman|publish/.test(u))                         cat='upload';
+  else if (/monitoring|pemantauan|evaluasi|penilaian/.test(u))                       cat='monitoring';
 
   const variants = CAT[cat];
 
-  // Kualitas SOP (10 variasi)
+  // Kualitas SOP (15 variasi)
   const KUALITAS = [
     'yang sesuai SOP dan berkualitas.',
     'yang sesuai SOP, akurat, dan dapat dipertanggungjawabkan.',
@@ -2358,15 +2529,25 @@ function generateOutput() {
     'yang sesuai SOP dan tepat waktu.',
     'yang terstruktur, akurat, dan siap digunakan sebagai bahan pelaporan.',
     'yang memenuhi kriteria mutu dan sesuai dengan standar yang ditetapkan.',
+    'yang telah dikerjakan secara cermat dan bertanggung jawab.',
+    'yang relevan, valid, dan siap dimanfaatkan untuk kepentingan dinas.',
+    'yang selesai sesuai target dan memenuhi ekspektasi pimpinan.',
+    'yang disusun dengan teliti sesuai petunjuk teknis yang berlaku.',
+    'yang berkualitas tinggi dan siap diarsipkan sebagai dokumentasi resmi.',
   ];
 
-  // 5 variasi struktur kalimat
+  // 10 variasi struktur kalimat (tanpa nama pegawai & total jam)
   const TMPL = [
-    (op,j,i,u,t,s,k) => `Dengan ${op} ${j}, yaitu ${i}${u?`, di ${u}`:''}${t?` pada tanggal ${t}`:''}. Adapun output yang dihasilkan berupa ${s} ${k} Kegiatan ini merupakan bagian dari upaya peningkatan kualitas penyelenggaraan statistik di BPS Kabupaten Lembata.`,
-    (op,j,i,u,t,s,k) => `Kegiatan ${i}${u?` di ${u}`:''} pada tanggal ${t||'...'} telah berhasil diselesaikan sebagai bagian dari ${j}. Output yang dicapai adalah ${s} ${k} Hal ini merupakan kontribusi nyata dalam mendukung penyelenggaraan statistik yang berkualitas di BPS Kabupaten Lembata.`,
-    (op,j,i,u,t,s,k) => `Pada tanggal ${t||'...'}, telah ${op.replace(/nya$/,'')} ${j} berupa ${i}${u?` di lingkungan ${u}`:''}. Hasil yang diperoleh adalah ${s} ${k} Kegiatan ini mendukung pencapaian target kinerja BPS Kabupaten Lembata.`,
-    (op,j,i,u,t,s,k) => `Sebagai bagian dari ${j}, kegiatan ${i} berhasil dituntaskan${u?` di ${u}`:''}${t?` pada tanggal ${t}`:''}. Luaran yang dihasilkan berupa ${s} ${k} Pelaksanaan kegiatan ini selaras dengan komitmen BPS Kabupaten Lembata dalam menghasilkan data statistik berkualitas.`,
-    (op,j,i,u,t,s,k) => `${op.charAt(0).toUpperCase()+op.slice(1)} ${j} melalui kegiatan ${i}${u?` di ${u}`:''}${t?` pada tanggal ${t}`:''}. Output yang dihasilkan adalah ${s} ${k} Kegiatan ini mendukung terwujudnya tata kelola statistik yang profesional di BPS Kabupaten Lembata.`,
+    (op,j,i,u,t,s,k) => `Dengan ${op} ${j}, yaitu ${i}${u?`, di ${u}`:''}. Adapun output yang dihasilkan berupa ${s} ${k} Kegiatan ini merupakan bagian dari upaya peningkatan kualitas penyelenggaraan statistik di BPS Kabupaten Lembata.`,
+    (op,j,i,u,t,s,k) => `Kegiatan ${i}${u?` di ${u}`:''} telah berhasil diselesaikan sebagai bagian dari ${j}. Output yang dicapai adalah ${s} ${k} Hal ini merupakan kontribusi nyata dalam mendukung penyelenggaraan statistik yang berkualitas di BPS Kabupaten Lembata.`,
+    (op,j,i,u,t,s,k) => `Telah ${op.replace(/nya$/,'')} ${j} berupa ${i}${u?` di lingkungan ${u}`:''}. Hasil yang diperoleh adalah ${s} ${k} Kegiatan ini mendukung pencapaian target kinerja BPS Kabupaten Lembata.`,
+    (op,j,i,u,t,s,k) => `Sebagai bagian dari ${j}, kegiatan ${i} berhasil dituntaskan${u?` di ${u}`:''}. Luaran yang dihasilkan berupa ${s} ${k} Pelaksanaan kegiatan ini selaras dengan komitmen BPS Kabupaten Lembata dalam menghasilkan data statistik berkualitas.`,
+    (op,j,i,u,t,s,k) => `${op.charAt(0).toUpperCase()+op.slice(1)} ${j} melalui kegiatan ${i}${u?` di ${u}`:''}. Output yang dihasilkan adalah ${s} ${k} Kegiatan ini mendukung terwujudnya tata kelola statistik yang profesional di BPS Kabupaten Lembata.`,
+    (op,j,i,u,t,s,k) => `Kegiatan ${i} berhasil dilaksanakan dalam rangka ${j}${u?` di ${u}`:''}. Hasil dari kegiatan ini berupa ${s} ${k} Ini merupakan wujud nyata komitmen pelaksanaan tugas kedinasan di BPS Kabupaten Lembata.`,
+    (op,j,i,u,t,s,k) => `Dalam rangka ${j}, telah dilaksanakan kegiatan ${i}${u?` pada lingkup ${u}`:''}. Capaian yang diperoleh berupa ${s} ${k} Kegiatan ini berkontribusi pada terwujudnya pelayanan statistik yang andal dan terpercaya.`,
+    (op,j,i,u,t,s,k) => `Output dari pelaksanaan ${j} berupa ${i}${u?` di ${u}`:''}. Hasil akhir yang diperoleh adalah ${s} ${k} Pelaksanaan kegiatan ini mendukung penguatan kapasitas kelembagaan BPS Kabupaten Lembata.`,
+    (op,j,i,u,t,s,k) => `${op.charAt(0).toUpperCase()+op.slice(1)} ${j} telah terwujud melalui kegiatan ${i}${u?` di ${u}`:''}. Luaran konkret yang dihasilkan adalah ${s} ${k} Capaian ini mencerminkan dedikasi dalam mendukung penyelenggaraan statistik nasional.`,
+    (op,j,i,u,t,s,k) => `Telah terselesaikan kegiatan ${i} yang merupakan bagian dari ${j}${u?` di ${u}`:''}. Produk yang dihasilkan berupa ${s} ${k} Hasil kerja ini diharapkan dapat mendukung peningkatan kualitas data dan layanan statistik BPS Kabupaten Lembata.`,
   ];
 
   // Inti uraian (kalimat pertama, maks 90 karakter)
@@ -2374,7 +2555,7 @@ function generateOutput() {
   const intiS = inti.length > 90 ? inti.slice(0,90)+'...' : inti;
   const intiLc = intiS.charAt(0).toLowerCase() + intiS.slice(1);
 
-  // Cycling: setiap klik dapat hasil berbeda (total = 5 variants × 5 templates = 25)
+  // Cycling: setiap klik dapat hasil berbeda (total = 8 variants × 10 templates = 80)
   if (!S.outputCycle) S.outputCycle = 0;
   const total  = variants.length * TMPL.length;
   const idx    = S.outputCycle % total;
