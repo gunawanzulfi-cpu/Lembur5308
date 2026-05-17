@@ -773,27 +773,38 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 function migrateLembur(data) {
-  // Migrasi data lama: entri multi-date yang punya e.dates[]
-  // tapi Jam_Mulai/Jam_Selesai tersimpan rusak (mis. "1899-12-30")
+  // Nilai dianggap rusak jika bukan format HH:MM atau mengandung 1899
+  const isRusakJam  = v => !v || String(v).includes('1899') || !String(v).match(/^\d{1,2}:\d{2}$/);
+  const isRusakTgl  = v => !v || String(v).includes('1899') || !String(v).match(/^\d{4}-\d{2}-\d{2}$/);
+
   return data.map(e => {
-    if (!e.dates || e.dates.length === 0) return e;
-    // Deteksi nilai rusak: bukan format HH:MM
-    const isRusak = v => !v || !String(v).match(/^\d{2}:\d{2}$/);
-    if (isRusak(e.Jam_Mulai) || isRusak(e.Jam_Selesai)) {
-      // Ambil dari dates[0] jika ada
+    const isMulti = e.dates && e.dates.length > 0;
+
+    // ── Entri MULTI-DATE ───────────────────────────────────────────
+    if (isMulti) {
       const sorted = [...e.dates].filter(d=>d.tanggal).sort((a,b)=>a.tanggal.localeCompare(b.tanggal));
       const first = sorted[0];
       if (first) {
-        e = {
-          ...e,
-          Jam_Mulai:  isRusak(e.Jam_Mulai)  ? (first.jam_mulai  || '') : e.Jam_Mulai,
-          Jam_Selesai: isRusak(e.Jam_Selesai) ? (first.jam_selesai || '') : e.Jam_Selesai,
-          Tanggal: isRusak(e.Tanggal) || String(e.Tanggal).startsWith('1899')
-            ? first.tanggal : e.Tanggal,
-          Hari: e.Hari || first.hari || '',
-        };
+        // Perbaiki jam & tanggal di root entry jika rusak
+        if (isRusakJam(e.Jam_Mulai))   e = {...e, Jam_Mulai:  first.jam_mulai  || ''};
+        if (isRusakJam(e.Jam_Selesai)) e = {...e, Jam_Selesai: first.jam_selesai || ''};
+        if (isRusakTgl(e.Tanggal))     e = {...e, Tanggal: first.tanggal, Hari: e.Hari || first.hari || ''};
       }
+      // Perbaiki jam di setiap item dates[] jika rusak
+      e = {...e, dates: e.dates.map(d => {
+        let nd = {...d};
+        if (isRusakJam(d.jam_mulai))   nd.jam_mulai  = '';
+        if (isRusakJam(d.jam_selesai)) nd.jam_selesai = '';
+        if (isRusakTgl(d.tanggal))     nd.tanggal = '';
+        return nd;
+      })};
+      return e;
     }
+
+    // ── Entri SINGLE-DATE ─────────────────────────────────────────
+    if (isRusakJam(e.Jam_Mulai))   e = {...e, Jam_Mulai: ''};
+    if (isRusakJam(e.Jam_Selesai)) e = {...e, Jam_Selesai: ''};
+    if (isRusakTgl(e.Tanggal))     e = {...e, Tanggal: '', Hari: ''};
     return e;
   });
 }
@@ -1066,13 +1077,29 @@ function entryCardHTML(e) {
     ds = (e.Hari||HARI[d.getDay()])+', '+d.getDate()+' '+BULAN[d.getMonth()]+' '+d.getFullYear();
   }
   const ur = (e.Uraian_Kegiatan||'—').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const jamInfo = isMulti
-    ? (e.dates.length > 1 ? e.dates.length+' hari lembur' : (e.dates[0]?.jam_mulai||'?')+' – '+(e.dates[0]?.jam_selesai||'?'))
-    : (e.Jam_Mulai||'?')+' – '+(e.Jam_Selesai||'?');
+  const isValidJam = v => v && String(v).match(/^\d{1,2}:\d{2}$/);
+  let jamInfo;
+  if (isMulti && e.dates.length > 1) {
+    // Multi-date: cek apakah ada jam valid di dates[]
+    const validDates = e.dates.filter(d => isValidJam(d.jam_mulai) && isValidJam(d.jam_selesai));
+    if (validDates.length > 0) {
+      const fd = validDates[0], ld = validDates[validDates.length-1];
+      jamInfo = fd.jam_mulai + ' – ' + ld.jam_selesai + ' · ' + e.dates.length + ' hari';
+    } else {
+      jamInfo = e.dates.length + ' hari lembur';
+    }
+  } else {
+    // Single atau multi 1 tanggal: cari jam valid dari semua sumber
+    const jm = isValidJam(e.Jam_Mulai) ? e.Jam_Mulai
+             : (e.dates?.[0] && isValidJam(e.dates[0].jam_mulai) ? e.dates[0].jam_mulai : null);
+    const js = isValidJam(e.Jam_Selesai) ? e.Jam_Selesai
+             : (e.dates?.[0] && isValidJam(e.dates[0].jam_selesai) ? e.dates[0].jam_selesai : null);
+    jamInfo = jm && js ? jm + ' – ' + js : null;
+  }
   return `<div class="entry-card" onclick="openDetail('${e.ID}')">
     <div class="ec-date">${ds}</div>
     <div class="ec-nama">${e.Nama||'—'}</div>
-    <div class="ec-jam">⏱ ${jamInfo} (${fmtJam(Number(e.Total_Jam)||0)} jam)</div>
+    <div class="ec-jam">⏱ ${jamInfo ? jamInfo + ' · ' : ''}${fmtJam(Number(e.Total_Jam)||0)} jam</div>
     <div class="ec-uraian">${ur}</div>
     <div class="ec-foot">
       <span class="badge badge-navy">${e.No_SPL?'SPKL: '+e.No_SPL:e.Jabatan||'—'}</span>
@@ -1116,17 +1143,46 @@ function openDetail(id) {
   let jamHTML;
   if (isMulti && e.dates.length > 0) {
     const sorted = [...e.dates].filter(d=>d.tanggal).sort((a,b)=>a.tanggal.localeCompare(b.tanggal));
+    const _vjm = v => v && String(v).match(/^\d{1,2}:\d{2}$/) ? v : null;
     jamHTML = sorted.map(d=>{
       const dd = new Date(d.tanggal+'T00:00:00');
       const tgl = (d.hari||HARI[dd.getDay()])+' '+dd.getDate()+' '+BULAN[dd.getMonth()];
-      const jam = (d.jam_mulai||'?')+' – '+(d.jam_selesai||'?');
-      const tot = d.total_jam > 0 ? ' ('+Math.floor(d.total_jam)+' jam)' : '';
-      return '<div style="font-size:12.5px;margin-bottom:2px">'+tgl+': '+jam+tot+'</div>';
+      const jm = _vjm(d.jam_mulai), js = _vjm(d.jam_selesai);
+      const jam = jm && js ? jm+' – '+js : '';
+      const tot = d.total_jam > 0 ? (jam?' (':' ')+'('+Math.floor(d.total_jam)+' jam)' : '';
+      return '<div style="font-size:12.5px;margin-bottom:2px">'+tgl+(jam||tot ? ': '+jam+tot : '')+'</div>';
     }).join('');
     if (e.dates.length > 1) jamHTML += '<div style="margin-top:4px;font-weight:700">Total: '+fmt2(Number(e.Total_Jam)||0)+' jam</div>';
   } else {
-    jamHTML = (e.Jam_Mulai||'?')+' – '+(e.Jam_Selesai||'?')+' &nbsp;·&nbsp; <strong>'+fmt2(Number(e.Total_Jam)||0)+' jam</strong>';
+    const _fj = v => (v && String(v).match(/^\d{1,2}:\d{2}$/) ? v : null);
+    const jm = _fj(e.Jam_Mulai), js = _fj(e.Jam_Selesai);
+    if (jm && js) {
+      jamHTML = jm+' – '+js+' &nbsp;&middot;&nbsp; <strong>'+fmt2(Number(e.Total_Jam)||0)+' jam</strong>';
+    } else {
+      jamHTML = '<strong>'+fmt2(Number(e.Total_Jam)||0)+' jam</strong>';
+    }
   }
+  // Buat baris periode lembur (selalu tampil di atas jam lembur)
+  const periodeHTML = (()=>{
+    if (isMulti && e.dates && e.dates.length > 0) {
+      const sorted = [...e.dates].filter(d=>d.tanggal).sort((a,b)=>a.tanggal.localeCompare(b.tanggal));
+      if (sorted.length >= 2) {
+        const f = new Date(sorted[0].tanggal+'T00:00:00');
+        const l = new Date(sorted[sorted.length-1].tanggal+'T00:00:00');
+        if (f.getMonth()===l.getMonth()&&f.getFullYear()===l.getFullYear())
+          return f.getDate()+' – '+l.getDate()+' '+BULAN[f.getMonth()]+' '+f.getFullYear();
+        return f.getDate()+' '+BULAN[f.getMonth()]+' '+f.getFullYear()+' s/d '+l.getDate()+' '+BULAN[l.getMonth()]+' '+l.getFullYear();
+      } else if (sorted.length === 1) {
+        const d = new Date(sorted[0].tanggal+'T00:00:00');
+        return (sorted[0].hari||HARI[d.getDay()])+', '+d.getDate()+' '+BULAN[d.getMonth()]+' '+d.getFullYear();
+      }
+    }
+    if (e.Tanggal && !String(e.Tanggal).includes('1899')) {
+      const d = new Date(e.Tanggal+'T00:00:00');
+      return (e.Hari||HARI[d.getDay()])+', '+d.getDate()+' '+BULAN[d.getMonth()]+' '+d.getFullYear();
+    }
+    return null;
+  })();
   const urS  = (e.Uraian_Kegiatan||'—').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const outS = (e.Output||'—').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   el('modal-content').innerHTML = `
@@ -1137,6 +1193,7 @@ function openDetail(id) {
     <div class="dl-row"><div class="dl-label">Golongan</div><div class="dl-val">${e.Golongan||'—'}</div></div>
     <div class="dl-row"><div class="dl-label">Unit Kerja</div><div class="dl-val">${e.Unit_Kerja||'—'}</div></div>
     <div class="dl-sep"></div>
+    ${periodeHTML ? `<div class="dl-row"><div class="dl-label">Periode Lembur</div><div class="dl-val">${periodeHTML}</div></div>` : ''}
     <div class="dl-row"><div class="dl-label">Jam Lembur</div><div class="dl-val">${jamHTML}</div></div>
     <div class="dl-row"><div class="dl-label">No. SPL</div><div class="dl-val">${e.No_SPL||'—'}</div></div>
     <div class="dl-sep"></div>
