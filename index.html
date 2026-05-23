@@ -8,33 +8,44 @@
 <title>Laporan Lembur — BPS Kab. Lembata</title>
 <style>
 /* ═══════════════════════════ VARIABLES ═══════════════════════════ */
-:root{
-  --navy:      #003087;
-  --navy-dk:   #002266;
-  --navy-md:   #1a4ab5;
-  --navy-100:  #c8d8f0;
-  --navy-50:   #e8eefa;
-  --teal:      #0891b2;
-  --ok:        #059669;
-  --ok-50:     #ecfdf5;
-  --warn:      #d97706;
-  --warn-50:   #fffbeb;
-  --danger:    #dc2626;
-  --danger-50: #fef2f2;
-  --ink:       #1e293b;
-  --ink-700:   #374151;
-  --ink-500:   #6b7280;
-  --ink-400:   #9ca3af;
-  --ink-200:   #e5e7eb;
-  --ink-100:   #f3f4f6;
-  --ink-50:    #f9fafb;
-  --paper:     #ffffff;
-  --bg:        #f0f4f9;
-  --r:         10px;
-  --r-sm:      7px;
-  --r-lg:      16px;
-  --sh:        0 1px 3px rgba(0,0,0,.09),0 1px 2px rgba(0,0,0,.06);
-  --sh-md:     0 4px 8px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.05);
+:root {
+  --bg:        #0a0a0f;
+  --bg-card:   #111118;
+  --bg-card2:  #16161f;
+  --bg-card3:  #1c1c28;
+  --border:    rgba(255,255,255,0.07);
+  --border-hi: rgba(255,255,255,0.13);
+  --accent:       #6366f1;
+  --accent-glow:  rgba(99,102,241,0.25);
+  --accent-dk:    #4f46e5;
+  --accent-lt:    #818cf8;
+  --teal:         #06b6d4;
+  --teal-glow:    rgba(6,182,212,0.2);
+  --ok:        #10b981;
+  --ok-glow:   rgba(16,185,129,0.2);
+  --ok-50:     rgba(16,185,129,0.1);
+  --warn:      #f59e0b;
+  --warn-50:   rgba(245,158,11,0.1);
+  --danger:    #ef4444;
+  --danger-50: rgba(239,68,68,0.1);
+  --ink:       #f0f0f8;
+  --ink-700:   #c8c8d8;
+  --ink-500:   #8888a8;
+  --ink-400:   #5a5a78;
+  --ink-200:   rgba(255,255,255,0.08);
+  --ink-100:   rgba(255,255,255,0.04);
+  --ink-50:    rgba(255,255,255,0.02);
+  --paper:     #111118;
+  --navy:      #6366f1;
+  --navy-dk:   #4f46e5;
+  --navy-md:   #818cf8;
+  --navy-100:  rgba(99,102,241,0.2);
+  --navy-50:   rgba(99,102,241,0.08);
+  --r:         12px;
+  --r-sm:      8px;
+  --r-lg:      18px;
+  --sh:        0 1px 0 rgba(255,255,255,0.05), 0 4px 16px rgba(0,0,0,0.4);
+  --sh-md:     0 1px 0 rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.5);
   --nav-h:     64px;
   --top-h:     56px;
 }
@@ -103,6 +114,7 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-size:inherit
   transition:color .15s;padding:6px 4px;position:relative;
 }
 .nav-item.active{color:var(--navy)}
+.nav-item.disabled{color:var(--ink-200);cursor:not-allowed;pointer-events:none;opacity:.45}
 .nav-item.active::after{
   content:'';position:absolute;top:0;left:25%;right:25%;
   height:2.5px;background:var(--navy);border-radius:0 0 3px 3px;
@@ -375,6 +387,210 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-size:inherit
 .conn-dot{width:7px;height:7px;border-radius:50%;display:inline-block}
 .conn-dot.online{background:var(--ok)} .conn-dot.offline{background:var(--danger)} .conn-dot.checking{background:var(--warn);animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ═══════════════ DARK THEME OVERRIDES ═══════════════ */
+body { background: var(--bg); color: var(--ink); }
+.app { background: var(--bg); }
+
+.topbar {
+  background: #0d0d16;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 20px rgba(0,0,0,0.5);
+}
+.bps-logo { background: rgba(255,255,255,0.08); border: 1px solid var(--border-hi); }
+.icon-btn { background: rgba(255,255,255,0.08); }
+.icon-btn:active { background: rgba(255,255,255,0.16); }
+
+.bottom-nav { background: #0d0d16; border-top: 1px solid var(--border); }
+.nav-item { color: var(--ink-400); }
+.nav-item.active { color: var(--accent-lt); }
+.nav-item.active::after { background: var(--accent); }
+
+/* ── Bento Grid ── */
+.bento-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 12px;
+}
+.bento-full { grid-column: 1 / -1; }
+.bento-half { grid-column: span 1; }
+
+/* ── Cards ── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: var(--sh);
+  margin-bottom: 0;
+}
+.card-title { color: var(--ink-700); }
+
+/* ── Welcome ── */
+.welcome {
+  background: linear-gradient(135deg, #1a1a35 0%, #12122a 60%, #0f1020 100%);
+  border: 1px solid rgba(99,102,241,0.2);
+  box-shadow: 0 0 30px rgba(99,102,241,0.08), var(--sh);
+}
+.welcome::after { background: rgba(99,102,241,0.06); }
+.profile-sel { border-top-color: rgba(255,255,255,0.1); }
+.profile-sel select { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); }
+
+/* ── Add Button ── */
+.bento-add-btn {
+  width: 100%;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dk) 100%);
+  color: #fff;
+  border: none;
+  border-radius: var(--r);
+  padding: 14px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 20px var(--accent-glow), 0 1px 0 rgba(255,255,255,0.1) inset;
+  transition: all 0.15s;
+  letter-spacing: 0.2px;
+  font-family: inherit;
+}
+.bento-add-btn:active { transform: scale(0.98); box-shadow: 0 2px 8px var(--accent-glow); }
+
+/* ── Stat Cards ── */
+.stat-card {
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--accent);
+  box-shadow: var(--sh);
+  margin-bottom: 0;
+}
+.stat-v { color: var(--accent-lt); }
+.stat-l { color: var(--ink-500); }
+.stat-card.navy {
+  background: linear-gradient(135deg, #1e1e40, #141428);
+  border-top-color: var(--accent-lt);
+}
+.stat-card.navy .stat-v, .stat-card.navy .stat-l { color: #fff; }
+.stat-card.teal {
+  background: linear-gradient(135deg, #0c2a35, #071520);
+  border-top-color: var(--teal);
+}
+.stat-card.teal .stat-v { color: var(--teal); }
+.stat-card.teal .stat-l { color: rgba(255,255,255,0.6); }
+
+/* ── Entry Cards ── */
+.entry-card {
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  box-shadow: var(--sh);
+}
+.entry-card:hover { border-color: var(--border-hi); border-left-color: var(--accent-lt); }
+.ec-date { color: var(--accent-lt); }
+.ec-nama { color: var(--ink); }
+.ec-jam, .ec-uraian { color: var(--ink-500); }
+.badge-navy { background: rgba(99,102,241,0.12); color: var(--accent-lt); }
+.badge-ok { background: var(--ok-50); color: var(--ok); }
+
+/* ── Rekap Table ── */
+.rekap-tbl th { background: rgba(99,102,241,0.1); color: var(--accent-lt); border-bottom-color: rgba(99,102,241,0.2); }
+.rekap-tbl td { color: var(--ink-700); border-bottom-color: var(--border); }
+.rekap-tbl .total td { background: rgba(99,102,241,0.06); color: var(--accent-lt); }
+
+/* ── Form ── */
+.fg label { color: var(--ink-700); }
+.fg input, .fg select, .fg textarea {
+  background: var(--bg-card3);
+  border-color: var(--border-hi);
+  color: var(--ink);
+}
+.fg input:focus, .fg select:focus, .fg textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.fg input[readonly] { background: rgba(255,255,255,0.03); color: var(--ink-500); }
+.fg .hint { color: var(--ink-400); }
+.filter-row select {
+  background: var(--bg-card2);
+  border-color: var(--border-hi);
+  color: var(--ink);
+}
+.filter-row select:focus { border-color: var(--accent); }
+
+/* ── Buttons ── */
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:active { background: var(--accent-dk); }
+.btn-primary:disabled { background: var(--ink-400); }
+.btn-ghost { background: rgba(255,255,255,0.06); color: var(--ink-700); }
+.btn-ghost:active { background: rgba(255,255,255,0.1); }
+.btn-danger { background: var(--danger-50); color: var(--danger); }
+.btn-ok { background: var(--ok-50); color: var(--ok); }
+.btn-reset { background: rgba(255,255,255,0.08); color: var(--ink-700); }
+.btn-reset:active { background: rgba(255,255,255,0.12); }
+
+/* ── Toggle ── */
+.toggle-row { background: rgba(99,102,241,0.06); border: 1px solid var(--border); }
+.toggle-row-label { color: var(--ink-700); }
+.toggle-row-label .toggle-status { color: var(--ink-400); }
+.toggle-slider { background: rgba(255,255,255,0.12); }
+.toggle input:checked + .toggle-slider { background: var(--accent); }
+
+/* ── Summary Bar ── */
+.summary-bar { background: var(--bg-card); border: 1px solid var(--border); box-shadow: var(--sh); }
+
+/* ── Modals ── */
+.modal-overlay { background: rgba(0,0,0,0.7); }
+.modal-sheet { background: var(--bg-card); border-top: 1px solid var(--border-hi); }
+.modal-handle { background: rgba(255,255,255,0.12); }
+.modal-title { color: var(--ink); }
+.dl-label { color: var(--ink-400); }
+.dl-val { color: var(--ink); }
+.dl-sep { background: var(--border); }
+.tp-sheet { background: var(--bg-card); border-top: 1px solid var(--border-hi); }
+.tp-title { color: var(--accent-lt); }
+.tp-sel { background: var(--bg-card3); border-color: var(--border-hi); color: var(--ink); }
+.tp-sel:focus { border-color: var(--accent); }
+.tp-colon { color: var(--accent-lt); }
+
+/* ── Date Entry ── */
+.date-entry { background: var(--bg-card3); border-color: var(--border-hi); }
+.date-entry-rm { color: var(--ink-400); }
+.date-entry-rm:active { color: var(--danger); background: var(--danger-50); }
+.date-entry-dur { color: var(--ok); }
+
+/* ── Doc/Photo ── */
+.doc-item { background: var(--bg-card3); border-color: var(--border); }
+.doc-caption-inp { background: transparent; color: var(--ink); border-top-color: var(--border); }
+.doc-caption-inp:focus { background: rgba(99,102,241,0.06); }
+
+/* ── Input Tab Card ── */
+#tab-input { padding: 12px 12px 4px; background: var(--bg); }
+#tab-input .card { background: var(--bg-card); border: 1px solid var(--border); margin-bottom: 12px; }
+
+/* ── Success Box ── */
+.success-box { background: var(--bg-card); border: 1px solid var(--border); box-shadow: var(--sh-md); }
+.success-title { color: var(--ok); }
+.success-detail { color: var(--ink-500); }
+
+/* ── Sec Label ── */
+.sec-label { color: var(--ink-400); }
+
+/* ── Empty State ── */
+.empty { color: var(--ink-400); }
+
+/* ── Toast ── */
+.toast { background: var(--bg-card3); border: 1px solid var(--border-hi); }
+.toast.ok { background: rgba(16,185,129,0.15); border-color: var(--ok); color: var(--ok); }
+.toast.err { background: rgba(239,68,68,0.15); border-color: var(--danger); color: var(--danger); }
+
+/* ── Divider ── */
+.divider { background: var(--border); }
+
+/* ── Tab content ── */
+.tab-content { background: var(--bg); }
+#tab-dashboard { padding: 0; }
+
 </style>
 </head>
 <body>
@@ -417,67 +633,102 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-size:inherit
   <div class="tab-content">
 
     <!-- ════════════ DASHBOARD ════════════ -->
-    <div class="tab active" id="tab-dashboard">
+        <div class="tab active" id="tab-dashboard">
+      <div class="bento-grid">
 
-      <!-- Welcome + Profil -->
-      <div class="welcome">
-        <div class="w-date" id="w-date">—</div>
-        <div class="w-name" id="w-name">Selamat datang</div>
-        <div class="w-role" id="w-role"></div>
-        <div class="w-nip"  id="w-nip"></div>
-        <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.2)">
-          <div style="font-size:11.5px;opacity:.9;line-height:1.6;margin-bottom:8px">
-            Sistem pencatatan &amp; pelaporan lembur pegawai<br>
-            <strong>BPS Kabupaten Lembata.</strong> Input data lembur dan generate laporan Word &amp; PDF.
-          </div>
-          <!-- sel-profil hidden — masih dipakai oleh setPegActive() & populatePegDropdowns() -->
-          <select id="sel-profil" onchange="setPegActive()" style="display:none">
-            <option value="">— Belum dipilih —</option>
-          </select>
+        <!-- Welcome — full width -->
+        <div class="bento-full">
+          <!-- Welcome + Profil -->
+                <div class="welcome">
+                  <div class="w-date" id="w-date">—</div>
+                  <div class="w-name" id="w-name">Selamat datang</div>
+                  <div class="w-role" id="w-role"></div>
+                  <div class="w-nip"  id="w-nip"></div>
+                  <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.2)">
+                    <div style="font-size:11.5px;opacity:.9;line-height:1.6;margin-bottom:8px">
+                      Sistem pencatatan &amp; pelaporan lembur pegawai<br>
+                      <strong>BPS Kabupaten Lembata.</strong> Input data lembur dan generate laporan Word &amp; PDF.
+                    </div>
+                    <!-- sel-profil hidden — masih dipakai oleh setPegActive() & populatePegDropdowns() -->
+                    <select id="sel-profil" onchange="setPegActive()" style="display:none">
+                      <option value="">— Belum dipilih —</option>
+                    </select>
+                  </div>
+                </div>
         </div>
-      </div>
 
-      <!-- Statistik -->
-      <div class="stats-grid">
-        <div class="stat-card navy">
+        <!-- Add Button — full width -->
+        <div class="bento-full">
+          <button class="bento-add-btn" onclick="goToNewReport()">
+            ＋ Tambah Laporan Baru
+          </button>
+        </div>
+
+        <!-- Stat Cards — 2 per row -->
+        <div class="bento-half">
+          <div class="stat-card navy">
           <div class="stat-v" id="s-entri-total">—</div>
           <div class="stat-l">Total Laporan</div>
         </div>
-        <div class="stat-card teal">
+        </div>
+
+        <div class="bento-half">
+          <div class="stat-card teal">
           <div class="stat-v" id="s-peg-total">—</div>
           <div class="stat-l">Total Pegawai Lembur</div>
         </div>
-      </div>
-
-      <!-- Riwayat -->
-      <div class="sec-label">Riwayat Lembur</div>
-
-      <div class="filter-row">
-        <select id="flt-peg" onchange="loadHistory()">
-          <option value="">Semua Pegawai</option>
-        </select>
-        <select id="flt-bln" onchange="loadHistory()"></select>
-        <select id="flt-thn" onchange="loadHistory()"></select>
-      </div>
-
-      <div class="action-row">
-        <button class="btn btn-primary btn-full" style="padding:14px;font-size:15px;letter-spacing:.2px" onclick="toggleRekap()">📊 Rekap Lembur</button>
-      </div>
-
-      <div id="hist-summary" style="display:none" class="summary-bar">
-        <span style="color:var(--ink-500)">Entri: <strong id="hs-entri" style="color:var(--ink)">0</strong></span>
-        <span style="color:var(--ink-500)">Total jam: <strong id="hs-jam" style="color:var(--navy)">0</strong></span>
-      </div>
-
-      <div id="rekap-section" style="display:none;margin-bottom:12px">
-        <div class="card" style="padding:12px;overflow-x:auto">
-          <div class="card-title">📊 Rekap Lembur</div>
-          <div id="rekap-content"></div>
         </div>
+
+        <!-- Chart — full width -->
+        <div class="bento-full">
+          <!-- Grafik Jam Lembur -->
+                <div class="card" id="chart-card" style="margin-bottom:12px;padding:14px 14px 10px">
+                  <div class="card-title" style="justify-content:space-between">
+                    <span>🏆 Jam Lembur Tertinggi <span id="chart-year-label" style="color:var(--ink-400);font-weight:400;font-size:11px"></span></span>
+                  </div>
+                  <div style="position:relative;height:160px">
+                    <canvas id="lembur-chart"></canvas>
+                  </div>
+                  <div id="chart-empty" style="display:none;text-align:center;padding:20px 0;color:var(--ink-400);font-size:13px">Belum ada data lembur</div>
+                </div>
+        </div>
+
+        <!-- Filters + Rekap — full width -->
+        <div class="bento-full">
+          <!-- Riwayat -->
+                <div class="sec-label">Riwayat Lembur</div>
+          
+                <div class="filter-row">
+                  <select id="flt-peg" onchange="loadHistory()">
+                    <option value="">Semua Pegawai</option>
+                  </select>
+                  <select id="flt-bln" onchange="loadHistory()"></select>
+                  <select id="flt-thn" onchange="loadHistory()"></select>
+                </div>
+          
+                <div class="action-row">
+                  <button class="btn btn-primary btn-full" style="padding:14px;font-size:15px;letter-spacing:.2px" onclick="toggleRekap()">📊 Rekap Lembur</button>
+                </div>
+          
+                <div id="hist-summary" style="display:none" class="summary-bar">
+                  <span style="color:var(--ink-500)">Entri: <strong id="hs-entri" style="color:var(--ink)">0</strong></span>
+                  <span style="color:var(--ink-500)">Total jam: <strong id="hs-jam" style="color:var(--navy)">0</strong></span>
+                </div>
+          
+                <div id="rekap-section" style="display:none;margin-bottom:12px">
+                  <div class="card" style="padding:12px;overflow-x:auto">
+                    <div class="card-title">📊 Rekap Lembur</div>
+                    <div id="rekap-content"></div>
+                  </div>
+                </div>
+        </div>
+
+        <!-- History List — full width -->
+        <div class="bento-full" id="history-list-wrap">
+          <div id="history-list"></div>
+        </div>
+
       </div>
-
-      <div id="history-list"></div>
-
     </div><!-- /tab-dashboard -->
 
     <!-- ════════════ INPUT ════════════ -->
@@ -500,7 +751,7 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-size:inherit
       <!-- Form input -->
       <div id="input-form">
         <div class="card">
-          <div class="card-title">✍️ Input Lembur Baru</div>
+          <div class="card-title" id="card-title-input">✍️ Input Lembur Baru</div>
 
           <div class="fg">
             <label>Pegawai <span class="req">*</span></label>
@@ -549,8 +800,14 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-size:inherit
               <div class="fg">
                 <label>Tanggal Lembur <span class="req">*</span></label>
                 <input type="date" id="f-tanggal" onchange="onTanggalChange()">
+                <div class="hint" id="f-hari-hint" style="margin-top:4px;color:var(--ink-500)"></div>
+                <input type="hidden" id="f-hari">
               </div>
-              <div class="fg"><label>Hari</label><input type="text" id="f-hari" readonly placeholder="Otomatis"></div>
+              <div class="fg">
+                <label>Tanggal Laporan <span class="req">*</span></label>
+                <input type="date" id="f-tgl-laporan" onchange="onTglLaporanChange()">
+                <div class="hint" id="f-tgl-laporan-hint" style="color:var(--ink-500)">≥ tanggal lembur</div>
+              </div>
             </div>
             <div class="row2">
               <div class="fg">
@@ -606,6 +863,13 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-size:inherit
                 <div class="hint" id="f-spl-hint-multi" style="color:var(--ink-500)">B-xxxx/5308/KU.300/mm/yyyy</div>
               </div>
             </div>
+            <div class="row2">
+              <div class="fg">
+                <label>Tanggal Laporan <span class="req">*</span></label>
+                <input type="date" id="f-tgl-laporan-m" onchange="onTglLaporanChangeMulti()">
+                <div class="hint" id="f-tgl-laporan-hint-m" style="color:var(--ink-500)">≥ tanggal lembur pertama</div>
+              </div>
+            </div>
           </div>
 
 
@@ -649,7 +913,7 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-size:inherit
 
           <div style="margin-top:10px;display:flex;flex-direction:column;gap:10px">
             <!-- Baris 1: Simpan Lembur (hijau neon) -->
-            <button class="btn btn-save btn-full" id="btn-submit" onclick="submitLembur()">
+            <button class="btn btn-save btn-full" id="btn-submit" onclick="submitLemburHandler()">
               <span id="submit-label">💾 Simpan Lembur</span>
             </button>
             <!-- Baris 2: Word (biru neon) + PDF (orange neon) -->
@@ -658,7 +922,7 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-size:inherit
               <button class="btn btn-pdf-neon" style="flex:1" onclick="exportFormPDF()">📑 Simpan PDF</button>
             </div>
             <!-- Baris 3: Reset (abu-abu) -->
-            <button class="btn btn-reset btn-full" onclick="resetForm()">🔄 Reset Form</button>
+            <button class="btn btn-reset btn-full" onclick="showResetConfirm()">🔄 Reset Form</button>
           </div>
         </div>
       </div><!-- /input-form -->
@@ -673,9 +937,9 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-size:inherit
       <span class="nav-icon">📊</span>
       <span class="nav-label">Dashboard</span>
     </button>
-    <button class="nav-item" id="nav-input" onclick="setTab('input')">
+    <button class="nav-item disabled" id="nav-input" onclick="setTab('input')" title="Pilih laporan dulu atau klik Tambah Laporan Baru">
       <span class="nav-icon">✍️</span>
-      <span class="nav-label">Input Lembur</span>
+      <span class="nav-label">Edit Lembur</span>
     </button>
   </nav>
 
@@ -697,6 +961,45 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-size:inherit
   </div>
 </div>
 
+<!-- Konfirmasi Keluar Tanpa Simpan -->
+<div class="modal-overlay" id="modal-confirm-unsaved" onclick="closeConfirmUnsaved()">
+  <div class="modal-sheet" onclick="event.stopPropagation()" style="max-height:290px">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="color:var(--warn)">⚠️ Perubahan Belum Disimpan</div>
+    <p style="font-size:13.5px;color:var(--ink-500);margin-bottom:20px;line-height:1.55">Anda sedang mengedit laporan lembur. Jika kembali ke Dashboard sekarang, perubahan yang belum disimpan akan <strong>hilang</strong>.</p>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-danger" style="flex:1" onclick="confirmUnsaved()">Ya, Kembali Tanpa Simpan</button>
+      <button class="btn btn-ghost" style="flex:1" onclick="closeConfirmUnsaved()">Batal, Lanjut Edit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Konfirmasi Hapus -->
+<div class="modal-overlay" id="modal-confirm-hapus" onclick="closeConfirmHapus()">
+  <div class="modal-sheet" onclick="event.stopPropagation()" style="max-height:280px">
+    <div class="modal-handle"></div>
+    <div class="modal-title" style="color:var(--danger)">🗑 Hapus Laporan?</div>
+    <p style="font-size:13.5px;color:var(--ink-500);margin-bottom:20px;line-height:1.55">Data laporan ini akan dihapus secara permanen dan <strong>tidak dapat dikembalikan</strong>.</p>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-danger" style="flex:1" onclick="confirmHapus()">Ya, Hapus</button>
+      <button class="btn btn-ghost" style="flex:1" onclick="closeConfirmHapus()">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- Konfirmasi Reset Form -->
+<div class="modal-overlay" id="modal-confirm-reset" onclick="closeConfirmReset()">
+  <div class="modal-sheet" onclick="event.stopPropagation()" style="max-height:280px">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🔄 Reset Form?</div>
+    <p style="font-size:13.5px;color:var(--ink-500);margin-bottom:20px;line-height:1.55">Semua data yang sudah diisi akan dihapus dan form akan dikembalikan ke kondisi awal.</p>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-danger" style="flex:1" onclick="confirmReset()">Ya, Reset</button>
+      <button class="btn btn-ghost" style="flex:1" onclick="closeConfirmReset()">Batal</button>
+    </div>
+  </div>
+</div>
+
 <!-- Detail Modal -->
 <div class="modal-overlay" id="modal-detail" onclick="closeModal()">
   <div class="modal-sheet" onclick="event.stopPropagation()">
@@ -705,17 +1008,19 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-size:inherit
     <div id="modal-content"></div>
     <div style="margin-top:14px">
       <div style="display:flex;gap:8px;margin-bottom:8px">
-        <button class="btn btn-ghost" style="flex:1;font-size:13px" onclick="exportModalWord()">📄 Simpan Word</button>
-        <button class="btn btn-ghost" style="flex:1;font-size:13px" onclick="exportModalPDF()">📑 Simpan PDF</button>
+        <button class="btn btn-primary" style="flex:1" onclick="editFromModal()">✏️ Edit</button>
+        <button class="btn btn-danger" style="flex:1" onclick="showDeleteConfirm()">🗑 Hapus</button>
       </div>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-danger" style="flex:1" onclick="deleteEntry()">🗑 Hapus</button>
-        <button class="btn btn-ghost"  style="flex:1" onclick="closeModal()">Tutup</button>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button class="btn btn-ghost" style="flex:1;font-size:12.5px" onclick="exportModalWord()">📄 Word</button>
+        <button class="btn btn-ghost" style="flex:1;font-size:12.5px" onclick="exportModalPDF()">📑 PDF</button>
       </div>
+      <button class="btn btn-ghost btn-full" onclick="closeModal()">Tutup</button>
     </div>
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script>
@@ -724,8 +1029,16 @@ button,input,select,textarea{font-family:inherit;color:inherit;font-size:inherit
    Buka file ini dengan Notepad, cari GAS_URL, lalu ganti teksnya
    dengan URL Google Apps Script Anda.
 ════════════════════════════════════════════════════════════════ */
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbxZRFpNr8qYwzjPu3N1lZhTDsRlxzC6A_c21E_vgCo1tTbrrPxbCJnJ5BsGhbw7S300bw/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxMfli8aKMhsqcJec95i8eJYYI14ClJEBEVUOZIVtiYZeMZPY_BxckBZ6sUI0HF9TBBpA/exec';
 // Contoh: 'https://script.google.com/macros/s/AKfycbz7Gqo_sm7Y-2NEkjUk4-gb3iicy0bv7IfnRy4zXeYLHJAR29GnaX2osSPPv9TVSLibzg/exec'
+
+// ── Google Drive: ID folder tempat foto dokumentasi lembur disimpan ──
+// Cara mendapatkan ID folder:
+//   1. Buka Google Drive → buka folder yang diinginkan
+//   2. Salin ID dari URL: drive.google.com/drive/folders/[ID_DI_SINI]
+//   3. Paste ID di bawah ini (ganti tulisan ISI_FOLDER_ID_DISINI)
+//   4. Pastikan folder sudah di-share ke akun Google Apps Script
+const DRIVE_FOLDER_ID = '19DCgGVoclZRZHI-GqQhlqf0xHkjNBgF-';
 
 /* ════════════════════════════════════════════════════════════════
    KONSTANTA
@@ -759,6 +1072,7 @@ const S = {
   rekapOpen : false,
   docs      : [],   // foto dokumentasi form aktif [{dataUrl,gpsStamp,caption,imgW,imgH}]
   multiDates: [],   // [{tanggal,hari,jam_mulai,jam_selesai,total_jam}] untuk mode multi-tanggal
+  editId    : null,  // ID entri yg sedang diedit (null = input baru)
 };
 
 /* ════════════════════════════════════════════════════════════════
@@ -849,11 +1163,23 @@ function initApp() {
 function isConfigured() {
   return GAS_URL && GAS_URL !== 'PASTE_URL_GOOGLE_APPS_SCRIPT_ANDA_DI_SINI';
 }
+function isDriveConfigured() {
+  return isConfigured() && DRIVE_FOLDER_ID && DRIVE_FOLDER_ID !== 'ISI_FOLDER_ID_DISINI';
+}
 
 /* ════════════════════════════════════════════════════════════════
    NAVIGATION
 ════════════════════════════════════════════════════════════════ */
 function setTab(name) {
+  // Cek perubahan belum disimpan saat user klik Dashboard dari tab Edit
+  if (name === 'dashboard' && S.tab === 'input' && isFormDirty()) {
+    el('modal-confirm-unsaved').classList.add('open');
+    return;
+  }
+  _doSetTab(name);
+}
+
+function _doSetTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   el('tab-' + name).classList.add('active');
@@ -863,12 +1189,87 @@ function setTab(name) {
   document.querySelector('.tab-content').scrollTop = 0;
   if (name === 'dashboard') {
     renderDashboard();
+    updateEditNavState(); // Perbarui status tombol Edit Lembur
     // Sembunyikan success screen jika masih terbuka
     const sc = el('input-success');
     if (sc) sc.style.display = 'none';
     const fm = el('input-form');
     if (fm) fm.style.display = 'block';
   }
+}
+
+/* ─── Fungsi bantu navigasi & form state ──────────────────────── */
+
+// Cek apakah form edit lembur sudah terisi (ada perubahan)
+function isFormDirty() {
+  // Jika layar sukses sedang tampil, laporan sudah disimpan — tidak perlu konfirmasi
+  const successEl = el('input-success');
+  if (successEl && successEl.style.display !== 'none') return false;
+  // Jika form tersembunyi, tidak ada yang perlu dikonfirmasi
+  const formEl = el('input-form');
+  if (formEl && formEl.style.display === 'none') return false;
+
+  if (el('f-peg') && el('f-peg').value) return true;
+  if (el('f-uraian') && el('f-uraian').value.trim()) return true;
+  if (el('f-mulai') && el('f-mulai').value.trim()) return true;
+  if (S.docs && S.docs.length > 0) return true;
+  if (S.editId) return true;
+  return false;
+}
+
+// Perbarui status disabled/enabled tombol Edit Lembur di bottom nav
+function updateEditNavState() {
+  const btn = el('nav-input');
+  if (!btn) return;
+  // Aktifkan jika sedang dalam mode edit (S.editId ada) atau di tab input
+  if (S.editId || S.tab === 'input') {
+    btn.classList.remove('disabled');
+  } else {
+    btn.classList.add('disabled');
+  }
+}
+
+// Tombol "Tambah Laporan Baru" dari dashboard
+function goToNewReport() {
+  S.editId = null;
+  if (el('card-title-input')) el('card-title-input').innerHTML = '✍️ Input Lembur Baru';
+  // Reset form dulu
+  el('f-tanggal').value = todayStr(); onTanggalChange();
+  ['f-mulai','f-selesai','f-total','f-spl','f-uraian','f-output'].forEach(id => {
+    if (el(id)) { el(id).value = ''; if (el(id).style) el(id).style.borderColor = ''; }
+  });
+  el('f-total-hint') && (el('f-total-hint').textContent = '');
+  ['f-mulai-err','f-selesai-err'].forEach(id => { if(el(id)) el(id).style.display='none'; });
+  updateSplHint();
+  el('f-hari-libur').checked = false; onHariLiburChange();
+  S.docs = []; renderDocPreviews();
+  S.multiDates = [];
+  const _mt = el('f-multi-tgl');
+  if (_mt && _mt.checked) { _mt.checked = false; onMultiTglChange(); }
+  if (S.activePeg) { el('f-peg').value = String(S.activePeg.NIP); onPegChange(); }
+  // Aktifkan tombol Edit Lembur dan pindah tab
+  const btn = el('nav-input');
+  if (btn) btn.classList.remove('disabled');
+  el('input-form').style.display = 'block';
+  el('input-success').style.display = 'none';
+  _doSetTab('input');
+  document.querySelector('.tab-content').scrollTop = 0;
+}
+
+// Modal konfirmasi keluar tanpa simpan
+function closeConfirmUnsaved() {
+  el('modal-confirm-unsaved').classList.remove('open');
+}
+function confirmUnsaved() {
+  el('modal-confirm-unsaved').classList.remove('open');
+  // Reset state edit
+  S.editId = null;
+  S.docs = [];
+  S.multiDates = [];
+  if (el('card-title-input')) el('card-title-input').innerHTML = '✍️ Input Lembur Baru';
+  // Pindah ke dashboard
+  _doSetTab('dashboard');
+  updateEditNavState();
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -951,7 +1352,37 @@ async function fetchPeg() {
 }
 async function fetchLembur() {
   const r = await apiGet({ action:'getLembur' });
-  if (r.ok) { S.lembur = r.data; saveStorage(); }
+  if (!r.ok) return;
+
+  // Fix Bug 2: sanitize GAS timestamps (1899-12-30 date-serial values)
+  const gasData = migrateLembur(r.data);
+
+  // Fix Bug 1: build map of current local entries so we can preserve
+  // local-only fields that GAS never stores (dates[], docs[], driveFolder,
+  // driveFiles, Hari_Libur). Replacing S.lembur wholesale would wipe them.
+  const localMap = {};
+  S.lembur.forEach(e => { if (e.ID) localMap[e.ID] = e; });
+
+  // Merge: GAS wins for server columns, local wins for local-only fields
+  const merged = gasData.map(gasEntry => {
+    const local = localMap[gasEntry.ID];
+    if (!local) return gasEntry;
+    return {
+      ...gasEntry,
+      dates:       local.dates       || [],
+      docs:        local.docs        || [],
+      driveFolder: local.driveFolder || '',
+      driveFiles:  local.driveFiles  || [],
+      Hari_Libur:  local.Hari_Libur != null ? local.Hari_Libur : (gasEntry.Hari_Libur || false),
+    };
+  });
+
+  // Keep LOCAL- entries that were created offline and not yet in GAS
+  const gasIds = new Set(gasData.map(e => e.ID));
+  const unsynced = S.lembur.filter(e => e.ID && e.ID.startsWith('LOCAL-') && !gasIds.has(e.ID));
+
+  S.lembur = [...merged, ...unsynced];
+  saveStorage();
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -962,6 +1393,7 @@ function renderDashboard() {
   updateStats();
   populateFilters();
   loadHistory();
+  renderChart();
 }
 
 function updateWelcome() {
@@ -1008,6 +1440,7 @@ function loadHistory() {
     sm.style.display = 'none';
   }
   if (S.rekapOpen) buildRekap(data);
+  renderChart();
 
   const wrap = el('history-list');
   if (!data.length) {
@@ -1198,7 +1631,8 @@ function openDetail(id) {
     <div class="dl-row"><div class="dl-label">No. SPL</div><div class="dl-val">${e.No_SPL||'—'}</div></div>
     <div class="dl-sep"></div>
     <div class="dl-row"><div class="dl-label">Uraian Kegiatan</div><div class="dl-val" style="white-space:pre-wrap;line-height:1.6">${urS}</div></div>
-    <div class="dl-row"><div class="dl-label">Output / Hasil</div><div class="dl-val" style="white-space:pre-wrap;line-height:1.6">${outS}</div></div>`;
+    <div class="dl-row"><div class="dl-label">Output / Hasil</div><div class="dl-val" style="white-space:pre-wrap;line-height:1.6">${outS}</div></div>
+    ${e.driveFolder ? `<div class="dl-sep"></div><div class="dl-row"><div class="dl-label">📁 Foto di Drive</div><div class="dl-val"><a href="${e.driveFolder}" target="_blank" style="color:var(--teal);text-decoration:none;font-weight:600">Buka Folder Drive ↗</a> <span style="font-size:11px;color:var(--ink-400)">(${(e.driveFiles||[]).length} foto)</span></div></div>` : ''}`;
   el('modal-detail').classList.add('open');
 }
 function closeModal() {
@@ -1207,7 +1641,6 @@ function closeModal() {
 }
 async function deleteEntry() {
   const id = S.modalId; if (!id) return;
-  if (!confirm('Hapus entri ini?')) return;
   try {
     if (isConfigured() && !id.startsWith('LOCAL-')) {
       const r = await apiPost({ action:'deleteLembur', id });
@@ -1217,6 +1650,100 @@ async function deleteEntry() {
     saveStorage(); closeModal(); loadHistory(); updateStats();
     toast('Entri dihapus','ok');
   } catch(e) { toast('Gagal hapus: '+e.message,'err'); }
+}
+
+/* ── Konfirmasi Hapus ── */
+function showDeleteConfirm() {
+  el('modal-detail').classList.remove('open');
+  el('modal-confirm-hapus').classList.add('open');
+}
+function closeConfirmHapus() {
+  el('modal-confirm-hapus').classList.remove('open');
+  // Buka kembali modal detail jika masih ada entri
+  if (S.modalId) el('modal-detail').classList.add('open');
+}
+async function confirmHapus() {
+  el('modal-confirm-hapus').classList.remove('open');
+  await deleteEntry();
+}
+
+/* ── Konfirmasi Reset Form ── */
+function showResetConfirm() {
+  el('modal-confirm-reset').classList.add('open');
+}
+function closeConfirmReset() {
+  el('modal-confirm-reset').classList.remove('open');
+}
+function confirmReset() {
+  el('modal-confirm-reset').classList.remove('open');
+  resetForm();
+}
+
+/* ── Edit dari Modal Dashboard ── */
+function editFromModal() {
+  const e = S.lembur.find(x => x.ID === S.modalId);
+  if (!e) { toast('Data tidak ditemukan', 'err'); return; }
+  S.editId = e.ID;
+  closeModal();
+
+  // Ganti judul form
+  if (el('card-title-input')) el('card-title-input').innerHTML = '✏️ Edit Lembur';
+
+  // Pastikan form terlihat
+  el('input-form').style.display = 'block';
+  el('input-success').style.display = 'none';
+
+  // Set pegawai
+  el('f-peg').value = String(e.NIP); onPegChange();
+
+  // Fix Bug 3: use > 0, not > 1. A multi-date entry with exactly 1 date
+  // in the dates[] array is still a multi-date entry — the toggle should stay ON.
+  const isMulti = e.dates && e.dates.length > 0;
+  const _mt = el('f-multi-tgl');
+
+  if (isMulti) {
+    if (_mt && !_mt.checked) { _mt.checked = true; onMultiTglChange(); }
+    S.multiDates = e.dates.map(d => ({...d}));
+    renderMultiDates();
+    updateTotalMulti();
+  } else {
+    if (_mt && _mt.checked) { _mt.checked = false; onMultiTglChange(); }
+    const tgl = (e.dates && e.dates.length === 1) ? e.dates[0].tanggal : (e.Tanggal || '');
+    el('f-tanggal').value = tgl; onTanggalChange();
+    const jm = (e.dates && e.dates.length === 1) ? (e.dates[0].jam_mulai || '') : (e.Jam_Mulai || '');
+    const js = (e.dates && e.dates.length === 1) ? (e.dates[0].jam_selesai || '') : (e.Jam_Selesai || '');
+    el('f-mulai').value = jm;
+    el('f-selesai').value = js;
+    calcDurasi();
+  }
+
+  // Hari libur
+  const hl = el('f-hari-libur');
+  if (hl) { hl.checked = !!e.Hari_Libur; onHariLiburChange(); }
+
+  // Nomor SPKL — ambil angka dari format B-XXXX/...
+  const splMatch = (e.No_SPL || '').match(/^B-(\d+)\//);
+  el('f-spl').value = splMatch ? splMatch[1] : (e.No_SPL || '');
+  updateSplHint();
+
+  el('f-uraian').value = e.Uraian_Kegiatan || '';
+  el('f-output').value = e.Output || '';
+
+  // Tanggal laporan (penandatanganan) — isi kedua field (single & multi)
+  const tglLap = e.Tanggal_Laporan || todayStr();
+  if (el('f-tgl-laporan'))   { el('f-tgl-laporan').value   = tglLap; onTglLaporanChange(); }
+  if (el('f-tgl-laporan-m')) { el('f-tgl-laporan-m').value = tglLap; onTglLaporanChangeMulti(); }
+
+  // Foto dokumentasi (salin snapshot)
+  S.docs = (e.docs || []).map(d => ({...d}));
+  renderDocPreviews();
+
+  setTab('input');
+  document.querySelector('.tab-content').scrollTop = 0;
+  toast('Laporan dimuat — silakan edit lalu simpan', 'ok');
+  // Aktifkan tombol Edit Lembur di bottom nav
+  const navBtn = el('nav-input');
+  if (navBtn) navBtn.classList.remove('disabled');
 }
 
 /* ════════════════════════════════════════════════════════════════
@@ -1232,8 +1759,53 @@ function onPegChange() {
 }
 function onTanggalChange() {
   const v = el('f-tanggal').value;
-  el('f-hari').value = v ? HARI[new Date(v+'T00:00:00').getDay()] : '';
+  const hariNama = v ? HARI[new Date(v+'T00:00:00').getDay()] : '';
+  el('f-hari').value = hariNama;
+  // Tampilkan nama hari sebagai keterangan kecil di bawah field tanggal
+  const hint = el('f-hari-hint');
+  if (hint) hint.textContent = hariNama ? '📅 ' + hariNama : '';
+  // Set batas minimum tanggal laporan (single-date) = tanggal lembur
+  const lapEl = el('f-tgl-laporan');
+  if (lapEl) {
+    lapEl.min = v || '';
+    if (lapEl.value && v && lapEl.value < v) lapEl.value = v;
+    onTglLaporanChange();
+  }
   updateSplHint();
+}
+function onTglLaporanChange() {
+  const lapVal = el('f-tgl-laporan') ? el('f-tgl-laporan').value : '';
+  const tglVal = el('f-tanggal') ? el('f-tanggal').value : '';
+  const hint = el('f-tgl-laporan-hint');
+  const inp  = el('f-tgl-laporan');
+  if (!hint || !inp) return;
+  if (lapVal && tglVal && lapVal < tglVal) {
+    hint.textContent = '⚠ Tidak boleh sebelum tanggal lembur';
+    hint.style.color = 'var(--danger)';
+    inp.style.borderColor = 'var(--danger)';
+  } else {
+    hint.textContent = lapVal ? '✓ ' + HARI[new Date(lapVal+'T00:00:00').getDay()] : '≥ tanggal lembur';
+    hint.style.color = lapVal ? 'var(--ok)' : 'var(--ink-500)';
+    inp.style.borderColor = '';
+  }
+}
+function onTglLaporanChangeMulti() {
+  const lapVal = el('f-tgl-laporan-m') ? el('f-tgl-laporan-m').value : '';
+  // Ambil tanggal lembur pertama dari multiDates
+  const sorted = (S.multiDates || []).filter(d=>d.tanggal).sort((a,b)=>a.tanggal.localeCompare(b.tanggal));
+  const firstTgl = sorted.length ? sorted[0].tanggal : '';
+  const hint = el('f-tgl-laporan-hint-m');
+  const inp  = el('f-tgl-laporan-m');
+  if (!hint || !inp) return;
+  if (lapVal && firstTgl && lapVal < firstTgl) {
+    hint.textContent = '⚠ Tidak boleh sebelum tanggal lembur pertama';
+    hint.style.color = 'var(--danger)';
+    inp.style.borderColor = 'var(--danger)';
+  } else {
+    hint.textContent = lapVal ? '✓ ' + HARI[new Date(lapVal+'T00:00:00').getDay()] : '≥ tanggal lembur pertama';
+    hint.style.color = lapVal ? 'var(--ok)' : 'var(--ink-500)';
+    inp.style.borderColor = '';
+  }
 }
 function updateSplHint() {
   const num  = el('f-spl').value.trim();
@@ -1358,9 +1930,10 @@ function calcDurasiMulti(i) {
     d.total_jam = 0; if (durEl) durEl.textContent=''; updateTotalMulti(); return;
   }
   const [hm,mm]=d.jam_mulai.split(':').map(Number), [hs,ms]=d.jam_selesai.split(':').map(Number);
-  if ([hm,mm,hs,ms].some(isNaN)||hm>23||mm>59||hs>23||ms>59) {
+  // Jam selesai boleh 24:00 (tengah malam akhir hari), tapi tidak lebih
+  if ([hm,mm,hs,ms].some(isNaN)||hm>23||mm>59||hs>24||ms>59||(hs===24&&ms>0)) {
     d.total_jam=0;
-    if (durEl){durEl.textContent='⚠ Format jam tidak valid';durEl.style.color='var(--danger)';}
+    if (durEl){durEl.textContent='⚠ Format jam tidak valid (selesai maks 24:00)';durEl.style.color='var(--danger)';}
     updateTotalMulti(); return;
   }
   const mnt=(hs*60+ms)-(hm*60+mm);
@@ -1416,33 +1989,35 @@ let _tpTarget    = null;   // 'mulai' | 'selesai'  — mode 1 tanggal
 let _tpMultiIdx  = null;   // index S.multiDates   — mode multi
 let _tpMultiField= null;   // 'jam_mulai' | 'jam_selesai'
 
-function _tpEnsureOptions() {
+function _tpEnsureOptions(maxHour) {
   const h = el('tp-hour'), m = el('tp-min');
-  if (!h.options.length) {
-    for (let i=0;i<24;i++) h.add(new Option(String(i).padStart(2,'0'), i));
-    for (let i=0;i<60;i++) m.add(new Option(String(i).padStart(2,'0'), i));
-  }
+  // Selalu rebuild agar maxHour (23 vs 24) diterapkan dengan benar
+  h.innerHTML = ''; m.innerHTML = '';
+  for (let i=0; i<=maxHour; i++) h.add(new Option(String(i).padStart(2,'0'), i));
+  for (let i=0; i<60; i++)       m.add(new Option(String(i).padStart(2,'0'), i));
 }
-function _tpPrefill(val) {
-  if (val && val.includes(':') && val.length===5) {
-    const [hv,mv]=val.split(':').map(Number);
-    if (hv>=0&&hv<24) el('tp-hour').value=hv;
-    if (mv>=0&&mv<60) el('tp-min').value=mv;
+function _tpPrefill(val, maxHour) {
+  if (val && val.includes(':')) {
+    const [hv,mv] = val.split(':').map(Number);
+    if (hv>=0 && hv<=maxHour) el('tp-hour').value = hv;
+    if (mv>=0 && mv<60)       el('tp-min').value  = mv;
   }
 }
 
 function openTimePicker(field) {
   _tpTarget = field; _tpMultiIdx = null; _tpMultiField = null;
-  _tpEnsureOptions();
-  _tpPrefill(el('f-' + field).value);
+  const maxH = field === 'selesai' ? 24 : 23;
+  _tpEnsureOptions(maxH);
+  _tpPrefill(el('f-' + field).value, maxH);
   el('tp-title').textContent = field==='mulai' ? '🕐 Pilih Jam Mulai' : '🕐 Pilih Jam Selesai';
   el('tp-overlay').classList.add('open');
 }
 function openTimePickerMulti(i, field) {
   _tpTarget = null; _tpMultiIdx = i; _tpMultiField = field;
-  _tpEnsureOptions();
+  const maxH = field === 'jam_selesai' ? 24 : 23;
+  _tpEnsureOptions(maxH);
   const d = S.multiDates[i];
-  _tpPrefill(d ? d[field] : '');
+  _tpPrefill(d ? d[field] : '', maxH);
   el('tp-title').textContent = field==='jam_mulai' ? '🕐 Pilih Jam Mulai' : '🕐 Pilih Jam Selesai';
   el('tp-overlay').classList.add('open');
 }
@@ -1451,9 +2026,11 @@ function closeTimePicker() {
   _tpTarget = null; _tpMultiIdx = null; _tpMultiField = null;
 }
 function applyTimePicker() {
-  const hv = String(el('tp-hour').value).padStart(2,'0');
-  const mv = String(el('tp-min').value).padStart(2,'0');
-  const time = hv+':'+mv;
+  let hv = Number(el('tp-hour').value);
+  let mv = Number(el('tp-min').value);
+  // Jika jam = 24, paksa menit = 0 (24:00 adalah satu-satunya nilai valid untuk jam 24)
+  if (hv === 24) mv = 0;
+  const time = String(hv).padStart(2,'0') + ':' + String(mv).padStart(2,'0');
 
   if (_tpMultiIdx !== null) {
     // Mode multi-tanggal
@@ -1522,9 +2099,10 @@ function calcDurasi() {
     totEl.value=''; hintEl.textContent=''; return;
   }
   const [hm,mm]=mVal.split(':').map(Number), [hs,ms]=sVal.split(':').map(Number);
-  if ([hm,mm,hs,ms].some(isNaN)||hm>23||mm>59||hs>23||ms>59) {
+  // Jam selesai boleh 24:00 (tengah malam akhir hari), tapi tidak lebih
+  if ([hm,mm,hs,ms].some(isNaN)||hm>23||mm>59||hs>24||ms>59||(hs===24&&ms>0)) {
     totEl.value='';
-    hintEl.textContent='⚠ Format jam tidak valid (00:00–23:59)';
+    hintEl.textContent='⚠ Format jam tidak valid (mulai 00:00–23:59, selesai maks 24:00)';
     hintEl.style.color='var(--danger)';
     return;
   }
@@ -1554,7 +2132,11 @@ function onHariLiburChange() {
   el('hl-status').style.color = on ? 'var(--ok)' : 'var(--ink-400)';
 }
 function resetForm() {
+  S.editId = null;
+  if (el('card-title-input')) el('card-title-input').innerHTML = '✍️ Input Lembur Baru';
   el('f-tanggal').value=todayStr(); onTanggalChange();
+  if (el('f-tgl-laporan'))   { el('f-tgl-laporan').value=todayStr();   onTglLaporanChange(); }
+  if (el('f-tgl-laporan-m')) { el('f-tgl-laporan-m').value=todayStr(); onTglLaporanChangeMulti(); }
   ['f-mulai','f-selesai','f-total','f-spl','f-uraian','f-output'].forEach(id=>{
     el(id).value=''; if(el(id).style) el(id).style.borderColor='';
   });
@@ -1574,6 +2156,9 @@ function inputBaru() {
   el('input-success').style.display = 'none';
   el('input-form').style.display    = 'block';
   resetForm();
+  // Edit Lembur tetap aktif karena user memilih input baru
+  const navBtn = el('nav-input');
+  if (navBtn) navBtn.classList.remove('disabled');
 }
 
 async function submitLemburMulti() {
@@ -1594,6 +2179,9 @@ async function submitLemburMulti() {
   if (!S.docs||S.docs.length<1) { toast('Upload minimal 1 foto dokumentasi','err'); return; }
   const splNum = el('f-spl-multi') ? el('f-spl-multi').value.trim() : '';
   if (!splNum) { toast('Isi nomor SPKL terlebih dahulu','err'); el('f-spl-multi')&&el('f-spl-multi').focus(); return; }
+  // Validasi tanggal laporan (multi-date pakai f-tgl-laporan-m)
+  const tglLaporan = el('f-tgl-laporan-m') ? el('f-tgl-laporan-m').value : todayStr();
+  if (!tglLaporan) { toast('Isi tanggal laporan','err'); el('f-tgl-laporan-m')&&el('f-tgl-laporan-m').focus(); return; }
   const sorted = [...S.multiDates].filter(d=>d.tanggal).sort((a,b)=>a.tanggal.localeCompare(b.tanggal));
   const first  = sorted[0];
   const d0     = new Date(first.tanggal+'T00:00:00');
@@ -1607,6 +2195,7 @@ async function submitLemburMulti() {
     jam_mulai: first.jam_mulai, jam_selesai: first.jam_selesai,
     total_jam: String(Math.floor(totalJam)),
     no_spl: splFull, uraian, output: el('f-output').value.trim(), status:'Final',
+    ...(S.editId ? {id: S.editId} : {}),
   };
   const btn=el('btn-submit'), lbl=el('submit-label');
   btn.disabled=true; lbl.innerHTML='<span class="spinner"></span> Menyimpan…';
@@ -1617,8 +2206,9 @@ async function submitLemburMulti() {
       if (!res.ok) throw new Error(res.error||'Gagal menyimpan di server');
       savedId=res.id;
     } else { savedId='LOCAL-'+Date.now(); }
+    const _origEntryMulti = S.editId ? S.lembur.find(x => x.ID === S.editId) : null;
     const entry = {
-      ID:savedId, Timestamp:new Date().toISOString(),
+      ID:savedId, Timestamp: _origEntryMulti ? _origEntryMulti.Timestamp : new Date().toISOString(),
       NIP:nip, Nama:payload.nama, Jabatan:payload.jabatan,
       Golongan:payload.golongan, Unit_Kerja:payload.unit,
       Tanggal:first.tanggal, Hari:first.hari,
@@ -1626,10 +2216,21 @@ async function submitLemburMulti() {
       Total_Jam:payload.total_jam, No_SPL:splFull,
       Uraian_Kegiatan:uraian, Output:payload.output, Status:'Final',
       Hari_Libur: el('f-hari-libur').checked,
-      docs: S.docs.map(d=>({...d})),
+      Tanggal_Laporan: tglLaporan,
+      // Pertahankan driveFolder/driveFiles dari entry lama agar tidak hilang saat edit
+      driveFolder: _origEntryMulti?.driveFolder || '',
+      driveFiles:  _origEntryMulti?.driveFiles  || [],
+      docs:  S.docs.map(d=>({...d})),
       dates: sorted.map(d=>({...d}))
     };
-    S.lembur.unshift(entry); S.lastEntry=entry; saveStorage();
+    if (S.editId) {
+      S.lembur = S.lembur.map(x => x.ID === S.editId ? entry : x);
+    } else {
+      S.lembur.unshift(entry);
+    }
+    S.lastEntry=entry; S.editId=null; saveStorage();
+    if (el('card-title-input')) el('card-title-input').innerHTML = '✍️ Input Lembur Baru';
+    uploadDocsToDrive(entry); // upload foto ke Drive (async, tidak memblokir)
     const periode = getEntryPeriode(entry);
     el('success-detail').innerHTML =
       `<strong>${payload.nama}</strong><br>${periode}<br>⏱ Total: ${Math.floor(totalJam)} jam`+
@@ -1637,14 +2238,27 @@ async function submitLemburMulti() {
     el('input-form').style.display='none';
     el('input-success').style.display='block';
     document.querySelector('.tab-content').scrollTop=0;
-  } catch(e) { toast('Gagal: '+e.message,'err'); }
-  finally { btn.disabled=false; lbl.textContent='Simpan Lembur'; }
+    // Nonaktifkan tombol Edit Lembur — tidak ada laporan aktif lagi
+    const navBtn = el('nav-input');
+    if (navBtn) navBtn.classList.add('disabled');
+  } catch(e) {
+    toast('Gagal: '+e.message,'err');
+  } finally {
+    btn.disabled=false; lbl.innerHTML='💾 Simpan Lembur';
+  }
+}
+
+/* Handler untuk tombol Simpan Lembur — memilih fungsi yang tepat berdasarkan mode */
+function submitLemburHandler() {
+  const isMulti = el('f-multi-tgl').checked;
+  if (isMulti) {
+    submitLemburMulti();
+  } else {
+    submitLembur();
+  }
 }
 
 async function submitLembur() {
-  // Cek mode multi-tanggal
-  if (el('f-multi-tgl') && el('f-multi-tgl').checked) { return await submitLemburMulti(); }
-
   const nip     = el('f-peg').value;
   const tanggal = el('f-tanggal').value;
   const mulai   = el('f-mulai').value;
@@ -1686,6 +2300,7 @@ async function submitLembur() {
     total_jam: el('f-total').value,
     no_spl:    splFull,
     uraian, output: el('f-output').value.trim(), status:'Final',
+    ...(S.editId ? {id: S.editId} : {}),
   };
 
   const btn=el('btn-submit'), lbl=el('submit-label');
@@ -1696,13 +2311,14 @@ async function submitLembur() {
     if (isConfigured()) {
       const res = await apiPost(payload);
       if (!res.ok) throw new Error(res.error||'Gagal menyimpan di server');
-      savedId = res.id;
+      savedId = res.id || S.editId;
     } else {
-      savedId = 'LOCAL-'+Date.now();
+      savedId = S.editId || 'LOCAL-'+Date.now();
     }
 
+    const _origEntry = S.editId ? S.lembur.find(x => x.ID === S.editId) : null;
     const entry = {
-      ID:savedId, Timestamp:new Date().toISOString(),
+      ID:savedId, Timestamp:_origEntry ? _origEntry.Timestamp : new Date().toISOString(),
       NIP:nip, Nama:payload.nama, Jabatan:payload.jabatan,
       Golongan:payload.golongan, Unit_Kerja:payload.unit,
       Tanggal:tanggal, Hari:payload.hari,
@@ -1710,11 +2326,21 @@ async function submitLembur() {
       No_SPL:payload.no_spl, Uraian_Kegiatan:uraian,
       Output:payload.output, Status:'Final',
       Hari_Libur: el('f-hari-libur').checked,
+      Tanggal_Laporan: el('f-tgl-laporan') ? (el('f-tgl-laporan').value || todayStr()) : todayStr(),
+      // Pertahankan driveFolder/driveFiles dari entry lama agar tidak hilang saat edit
+      driveFolder: _origEntry?.driveFolder || '',
+      driveFiles:  _origEntry?.driveFiles  || [],
       docs: S.docs.map(d=>({...d}))  // snapshot foto saat submit
     };
-    S.lembur.unshift(entry);
-    S.lastEntry = entry;
+    if (S.editId) {
+      S.lembur = S.lembur.map(x => x.ID === S.editId ? entry : x);
+    } else {
+      S.lembur.unshift(entry);
+    }
+    S.lastEntry = entry; S.editId = null;
+    if (el('card-title-input')) el('card-title-input').innerHTML = '✍️ Input Lembur Baru';
     saveStorage();
+    uploadDocsToDrive(entry); // upload foto ke Drive (async, tidak memblokir)
 
     // Tampilkan layar sukses
     const d   = new Date(tanggal+'T00:00:00');
@@ -1727,10 +2353,13 @@ async function submitLembur() {
     el('input-form').style.display    = 'none';
     el('input-success').style.display = 'block';
     document.querySelector('.tab-content').scrollTop = 0;
+    // Nonaktifkan tombol Edit Lembur — tidak ada laporan aktif lagi
+    const navBtn = el('nav-input');
+    if (navBtn) navBtn.classList.add('disabled');
   } catch(e) {
     toast('Gagal: '+e.message,'err');
   } finally {
-    btn.disabled=false; lbl.textContent='Simpan Lembur';
+    btn.disabled=false; lbl.innerHTML='💾 Simpan Lembur';
   }
 }
 
@@ -1946,16 +2575,17 @@ function buildWordHTML(entries, meta, periode, hariLibur, docs=[]) {
     </tbody>
   </table>
   ${keterangan}
-  <div class="ttd">
+  <div class="ttd" style="${meta.nip==='198710192010121004'?'justify-content:flex-end':''}">
+    ${meta.nip!=='198710192010121004'?`
     <div class="blok">
       <div>Mengetahui / Menyetujui,</div><div>Kepala BPS Kabupaten Lembata,</div>
       <div class="garis"></div>
       <div class="nama">Muhamad Sukin, SST,M.Stat</div>
       <div class="garis-sep"></div>
       <div class="nip">NIP. 198710192010121004</div>
-    </div>
+    </div>`:''}
     <div class="blok">
-      <div>Lewoleba, ${formatDateFull(new Date())}</div><div>Yang Melaksanakan Lembur,</div>
+      <div>Lewoleba, ${formatDateFull(entries[0]?.Tanggal_Laporan || new Date())}</div><div>Yang Melaksanakan Lembur,</div>
       <div class="garis"></div>
       <div class="nama">${safeText(namaTTD)}</div>
       <div class="garis-sep"></div>
@@ -2121,24 +2751,34 @@ function buildAndSavePDF(entries, meta, periode, hariLibur, docs=[]) {
   fy+=12;
 
   // TTD
+  const isSukinLembur = (meta.nip === '198710192010121004');
   doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(0,0,0);
-  doc.text('Mengetahui / Menyetujui,',45,fy,{align:'center'});
-  doc.text('Kepala BPS Kabupaten Lembata,',45,fy+5.5,{align:'center'});
-  doc.text('Lewoleba, '+formatDateFull(new Date()),162,fy,{align:'center'});
-  doc.text('Yang Melaksanakan Lembur,',162,fy+5.5,{align:'center'});
-  // Nama (bold)
-  doc.setFont('helvetica','bold');doc.setFontSize(10);
-  doc.text('Muhamad Sukin, SST,M.Stat',45,fy+31,{align:'center'});
   const namaTTD=meta.nama!=='Semua Pegawai'?meta.nama:'_________________________';
   const nipTTD =meta.nip !=='—'?'NIP. '+meta.nip:'NIP. _______________________';
-  doc.text(namaTTD,162,fy+31,{align:'center'});
+  if (!isSukinLembur) {
+    doc.text('Mengetahui / Menyetujui,',45,fy,{align:'center'});
+    doc.text('Kepala BPS Kabupaten Lembata,',45,fy+5.5,{align:'center'});
+  }
+  const _ttdX = isSukinLembur ? 105 : 162;
+  const tglLaporanPdf = (entries && entries[0]?.Tanggal_Laporan) ? entries[0].Tanggal_Laporan : new Date();
+  doc.text('Lewoleba, '+formatDateFull(tglLaporanPdf),_ttdX,fy,{align:'center'});
+  doc.text('Yang Melaksanakan Lembur,',_ttdX,fy+5.5,{align:'center'});
+  // Nama (bold)
+  doc.setFont('helvetica','bold');doc.setFontSize(10);
+  if (!isSukinLembur) {
+    doc.text('Muhamad Sukin, SST,M.Stat',45,fy+31,{align:'center'});
+  }
+  doc.text(namaTTD,_ttdX,fy+31,{align:'center'});
   // Garis pemisah nama-NIP
   doc.setFont('helvetica','normal');doc.setLineWidth(0.25);
-  doc.line(22,fy+32.5,68,fy+32.5);doc.line(135,fy+32.5,188,fy+32.5);
+  if (!isSukinLembur) doc.line(22,fy+32.5,68,fy+32.5);
+  const _lx1 = isSukinLembur ? 70 : 135;
+  const _lx2 = isSukinLembur ? 140 : 188;
+  doc.line(_lx1,fy+32.5,_lx2,fy+32.5);
   // NIP
   doc.setFontSize(9);
-  doc.text('NIP. 198710192010121004',45,fy+35.5,{align:'center'});
-  doc.text(nipTTD,162,fy+35.5,{align:'center'});
+  if (!isSukinLembur) doc.text('NIP. 198710192010121004',45,fy+35.5,{align:'center'});
+  doc.text(nipTTD,_ttdX,fy+35.5,{align:'center'});
 
   // ── Halaman 2: Lampiran Dokumentasi ───────────────────────────
   if (docs && docs.length) {
@@ -2241,6 +2881,7 @@ function getFormEntry() {
       Total_Jam:String(Math.floor(totalJam)), No_SPL:splFull,
       Uraian_Kegiatan:el('f-uraian').value, Output:el('f-output').value,
       Status:'Draft', Hari_Libur:el('f-hari-libur').checked,
+      Tanggal_Laporan: el('f-tgl-laporan-m') ? (el('f-tgl-laporan-m').value || todayStr()) : todayStr(),
       dates:S.multiDates.map(d=>({...d}))
     };
   }
@@ -2254,7 +2895,8 @@ function getFormEntry() {
     No_SPL: (()=>{const n=el('f-spl').value.trim();if(!n)return '';const t=el('f-tanggal').value;const d=t?new Date(t+'T00:00:00'):new Date();return `B-${n}/5308/KU.300/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;})(),
     Uraian_Kegiatan: el('f-uraian').value,
     Output: el('f-output').value, Status: 'Draft',
-    Hari_Libur: el('f-hari-libur').checked
+    Hari_Libur: el('f-hari-libur').checked,
+    Tanggal_Laporan: el('f-tgl-laporan') ? (el('f-tgl-laporan').value || todayStr()) : todayStr()
   };
 }
 function validateFormBeforeExport() {
@@ -2625,6 +3267,228 @@ function generateOutput() {
 
   el('f-output').value = out;
   toast('Output diisi otomatis ✓', 'ok');
+}
+
+
+/* ════════════════════════════════════════════════════════════════
+   UPLOAD FOTO DOKUMENTASI KE GOOGLE DRIVE
+════════════════════════════════════════════════════════════════ */
+async function uploadDocsToDrive(entry) {
+  if (!isDriveConfigured()) return;
+  if (!entry.docs || !entry.docs.length) return;
+
+  // Jika driveFolder sudah ada, foto sebelumnya sudah terupload ke Drive.
+  // Bersihkan dataUrl lama dari localStorage (hemat space) lalu langsung keluar —
+  // tidak perlu upload ulang, tidak ada request ke GAS, tidak ada error.
+  if (entry.driveFolder) {
+    const idx = S.lembur.findIndex(x => x.ID === entry.ID);
+    if (idx >= 0 && S.lembur[idx].docs.some(d => d.dataUrl)) {
+      S.lembur[idx].docs = S.lembur[idx].docs.map(d => ({
+        caption : d.caption || '',
+        gps     : d.gps     || '',
+      }));
+      saveStorage();
+    }
+    return;
+  }
+
+  // Hanya upload docs yang punya base64 segar (belum pernah di-upload ke Drive).
+  const newDocs = entry.docs.filter(d => d.dataUrl && d.dataUrl.startsWith('data:'));
+  if (newDocs.length === 0) return; // tidak ada foto baru, skip
+
+  // Buat label bersih untuk nama subfolder & file
+  const safeNama = (entry.Nama || 'Pegawai').replace(/[,./\\:*?"<>| ]+/g,'_').substring(0,30);
+  const label    = safeNama + '_' + (entry.NIP || '') + '_' + (entry.Tanggal || '');
+
+  toast('☁️ Mengupload ' + newDocs.length + ' foto ke Google Drive…', '', 10000);
+
+  try {
+    const res = await apiPost({
+      action   : 'uploadDocs',
+      folderId : DRIVE_FOLDER_ID,
+      entryId  : entry.ID,
+      label    : label,
+      docs     : newDocs.map(d => ({ dataUrl: d.dataUrl, caption: d.caption || '' }))
+    });
+
+    if (!res.ok) throw new Error(res.error || 'Upload gagal');
+
+    // Simpan Drive URL ke entry di localStorage
+    const idx = S.lembur.findIndex(x => x.ID === entry.ID);
+    if (idx >= 0) {
+      S.lembur[idx].driveFolder = res.folderUrl;
+      S.lembur[idx].driveFiles  = res.files;
+      // Hapus dataUrl dari localStorage setelah berhasil upload —
+      // foto sudah aman di Drive, tidak perlu simpan base64 besar di browser.
+      // Pertahankan caption & gps agar tetap bisa ditampilkan di detail modal.
+      S.lembur[idx].docs = S.lembur[idx].docs.map(d => ({
+        caption : d.caption || '',
+        gps     : d.gps     || '',
+        // dataUrl sengaja tidak disimpan lagi
+      }));
+      saveStorage();
+    }
+
+    toast('☁️ Foto tersimpan di Drive (' + res.files.length + ' file) ✓', 'ok', 5000);
+  } catch(e) {
+    // Upload Drive gagal tapi laporan sudah tersimpan di Sheets — tidak perlu tampilkan error merah.
+    // Cukup catat di console untuk debugging jika dibutuhkan.
+    console.warn('[Drive] Upload foto gagal:', e.message);
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CHART VISUAL — Jam Lembur Tertinggi per Pegawai
+════════════════════════════════════════════════════════════════ */
+let _chartInst = null;
+
+// Helper: cek apakah hex/rgba terang → teks hitam, gelap → teks putih
+function _chartTextColor(bg) {
+  if (!bg) return '#ffffff';
+  if (bg === '#f59e0b') return '#111111'; // gold → teks gelap
+  // rgba(r,g,b,a) → ekstrak r,g,b
+  const m = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+  if (m) {
+    const lum = (parseInt(m[1])*299 + parseInt(m[2])*587 + parseInt(m[3])*114) / 1000;
+    return lum > 140 ? '#111111' : '#ffffff';
+  }
+  return '#ffffff';
+}
+
+// Plugin: tulis nama pegawai di dalam (atau di luar jika terlalu sempit) batang horizontal
+const _insideLabelPlugin = {
+  id: 'insideLabels',
+  afterDatasetsDraw(chart) {
+    const ctx = chart.ctx;
+    const ds  = chart.data.datasets[0];
+    const meta = chart.getDatasetMeta(0);
+    chart.data.labels.forEach((label, i) => {
+      const bar = meta.data[i];
+      if (!bar) return;
+      const bgColor   = Array.isArray(ds.backgroundColor) ? ds.backgroundColor[i] : ds.backgroundColor;
+      const barLeft   = chart.scales.x.getPixelForValue(0);
+      const barRight  = bar.x;
+      const barWidth  = barRight - barLeft;
+      const barY      = bar.y;
+      const pad       = 9;
+
+      ctx.save();
+      ctx.font = 'bold 11px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';
+      const tw = ctx.measureText(label).width;
+
+      if (barWidth >= tw + pad * 2) {
+        // Nama muat di dalam batang
+        ctx.fillStyle    = _chartTextColor(bgColor);
+        ctx.textAlign    = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label, barLeft + pad, barY);
+      } else {
+        // Nama di luar batang (kanan), warna muted
+        ctx.fillStyle    = '#c8c8d8';
+        ctx.textAlign    = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label, barRight + 5, barY);
+      }
+      ctx.restore();
+    });
+  }
+};
+
+function renderChart() {
+  const canvas = el('lembur-chart');
+  const emptyEl = el('chart-empty');
+  const yearLbl = el('chart-year-label');
+  if (!canvas) return;
+
+  const ft = el('flt-thn') ? el('flt-thn').value : '';
+  const targetYear = ft ? parseInt(ft) : new Date().getFullYear();
+  yearLbl.textContent = '— ' + targetYear;
+
+  // Filter & agregasi per pegawai
+  const byPeg = {};
+  S.lembur.filter(x => x.Tanggal && new Date(x.Tanggal+'T00:00:00').getFullYear() === targetYear)
+    .forEach(x => {
+      const nip = x.NIP || 'unknown';
+      if (!byPeg[nip]) byPeg[nip] = { nama: x.Nama || nip, jam: 0 };
+      byPeg[nip].jam += x.dates
+        ? x.dates.reduce((s,d)=>s+(Number(d.total_jam)||0), 0)
+        : (Number(x.Total_Jam)||0);
+    });
+
+  // Urut ascending (terbawah = terendah) agar bar terpanjang tampil di atas
+  const rows = Object.values(byPeg).sort((a,b)=>a.jam-b.jam).slice(-8);
+
+  if (!rows.length) {
+    canvas.style.display = 'none';
+    if (emptyEl) emptyEl.style.display = 'block';
+    if (_chartInst) { _chartInst.destroy(); _chartInst = null; }
+    return;
+  }
+  canvas.style.display = 'block';
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  // Nama singkat: "Nama Belakang" saja jika > 2 kata
+  const labels = rows.map(r => {
+    const parts = (r.nama||'').replace(/,.*$/,'').trim().split(/\s+/);
+    return parts.length > 2 ? parts[0]+' '+parts[parts.length-1] : r.nama;
+  });
+  const values = rows.map(r => parseFloat(r.jam.toFixed(1)));
+
+  // Warna indigo gradasi, top bar = gold
+  const n = rows.length;
+  const colors = rows.map((_, i) => {
+    if (i === n-1) return '#f59e0b'; // bar terpanjang → gold
+    const alpha = 0.35 + (i / (n-1)) * 0.55;
+    return `rgba(99,102,241,${alpha.toFixed(2)})`;
+  });
+
+  // Tinggi dinamis: 40px per bar, min 160px
+  const chartHeight = Math.max(160, n * 42 + 20);
+  canvas.parentElement.style.height = chartHeight + 'px';
+
+  if (_chartInst) { _chartInst.destroy(); _chartInst = null; }
+
+  const ctx = canvas.getContext('2d');
+  _chartInst = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: colors,
+        borderRadius: 4,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      indexAxis: 'y',          // ← HORIZONTAL
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: c => ' ' + c.parsed.x + ' jam',
+            title: items => rows[items[0].dataIndex].nama,
+          }
+        }
+      },
+      scales: {
+        y: {
+          grid: { display: false },
+          ticks: { display: false }, // label ditulis oleh plugin _insideLabelPlugin
+        },
+        x: {
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          ticks: { font: { size: 10 }, color: '#5a5a78',
+            callback: v => v + 'j' },
+          border: { display: false },
+        }
+      },
+      layout: { padding: { right: 8 } }
+    },
+    plugins: [_insideLabelPlugin]
+  });
 }
 
 </script>
