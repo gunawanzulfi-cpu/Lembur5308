@@ -3395,14 +3395,18 @@ const _insideLabelPlugin = {
 };
 
 function renderChart() {
-  const canvas = el('lembur-chart');
-  const emptyEl = el('chart-empty');
-  const yearLbl = el('chart-year-label');
-  if (!canvas) return;
+  // Gunakan wrapper (parent canvas) sebagai anchor utama
+  const chartWrap = el('lembur-chart') ? el('lembur-chart').parentElement : null;
+  const emptyEl   = el('chart-empty');
+  const yearLbl   = el('chart-year-label');
+  if (!chartWrap) return;
 
   const ft = el('flt-thn') ? el('flt-thn').value : '';
   const targetYear = ft ? parseInt(ft) : new Date().getFullYear();
-  yearLbl.textContent = '— ' + targetYear;
+  if (yearLbl) yearLbl.textContent = '— ' + targetYear;
+
+  // Hancurkan chart lama sebelum apapun
+  if (_chartInst) { _chartInst.destroy(); _chartInst = null; }
 
   // Filter & agregasi per pegawai
   const byPeg = {};
@@ -3415,41 +3419,41 @@ function renderChart() {
         : (Number(x.Total_Jam)||0);
     });
 
-  // Urut ascending (terbawah = terendah) agar bar terpanjang tampil di atas
-  const rows = Object.values(byPeg).sort((a,b)=>a.jam-b.jam).slice(-8);
+  // Top 5 jam terbanyak, urut ascending → bar terpanjang tampil di bawah
+  const rows = Object.values(byPeg).sort((a,b) => a.jam - b.jam).slice(-5);
 
   if (!rows.length) {
-    canvas.style.display = 'none';
+    chartWrap.style.display = 'none';
     if (emptyEl) emptyEl.style.display = 'block';
-    if (_chartInst) { _chartInst.destroy(); _chartInst = null; }
     return;
   }
-  canvas.style.display = 'block';
   if (emptyEl) emptyEl.style.display = 'none';
 
-  // Nama singkat: "Nama Belakang" saja jika > 2 kata
+  // Tinggi dinamis sebelum canvas dibuat
+  const n = rows.length;
+  const chartHeight = Math.max(160, n * 44 + 20);
+  chartWrap.style.height = chartHeight + 'px';
+  chartWrap.style.display = 'block';
+
+  // Buat ulang canvas agar tidak ada state stale dari render sebelumnya
+  chartWrap.innerHTML = '<canvas id="lembur-chart"></canvas>';
+  const canvas = el('lembur-chart');
+
+  // Nama singkat
   const labels = rows.map(r => {
     const parts = (r.nama||'').replace(/,.*$/,'').trim().split(/\s+/);
     return parts.length > 2 ? parts[0]+' '+parts[parts.length-1] : r.nama;
   });
   const values = rows.map(r => parseFloat(r.jam.toFixed(1)));
 
-  // Warna indigo gradasi, top bar = gold
-  const n = rows.length;
+  // Warna indigo gradasi, bar terpanjang (index terakhir) = gold
   const colors = rows.map((_, i) => {
-    if (i === n-1) return '#f59e0b'; // bar terpanjang → gold
-    const alpha = 0.35 + (i / (n-1)) * 0.55;
+    if (i === n - 1) return '#f59e0b';
+    const alpha = 0.35 + (i / Math.max(n - 1, 1)) * 0.55;
     return `rgba(99,102,241,${alpha.toFixed(2)})`;
   });
 
-  // Tinggi dinamis: 40px per bar, min 160px
-  const chartHeight = Math.max(160, n * 42 + 20);
-  canvas.parentElement.style.height = chartHeight + 'px';
-
-  if (_chartInst) { _chartInst.destroy(); _chartInst = null; }
-
-  const ctx = canvas.getContext('2d');
-  _chartInst = new Chart(ctx, {
+  _chartInst = new Chart(canvas, {
     type: 'bar',
     data: {
       labels,
@@ -3461,9 +3465,10 @@ function renderChart() {
       }]
     },
     options: {
-      indexAxis: 'y',          // ← HORIZONTAL
+      indexAxis: 'y',
       responsive: true,
       maintainAspectRatio: false,
+      animation: false,          // render sinkron, hindari glitch saat tab baru aktif
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -3476,12 +3481,12 @@ function renderChart() {
       scales: {
         y: {
           grid: { display: false },
-          ticks: { display: false }, // label ditulis oleh plugin _insideLabelPlugin
+          ticks: { display: false }, // nama ditulis oleh _insideLabelPlugin
         },
         x: {
+          min: 0,
           grid: { color: 'rgba(255,255,255,0.05)' },
-          ticks: { font: { size: 10 }, color: '#5a5a78',
-            callback: v => v + 'j' },
+          ticks: { font: { size: 10 }, color: '#5a5a78', callback: v => v + 'j' },
           border: { display: false },
         }
       },
